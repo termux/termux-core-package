@@ -184,6 +184,8 @@ termux_core__tests__runtime_tests__run_command() {
 
     termux_core__termux_scoped_env_variable__run_tests || return $?
     termux_core__termux_apps_info_env_variable__run_tests || return $?
+    termux_core__termux_apps_info_app_version_name__run_tests || return $?
+
     return 0
 
 }
@@ -2221,10 +2223,10 @@ source_file_from_path "termux-apps-info-env-variable.bash" || exit $?'
 
     termux_apps_info_env_file_path="$TERMUX_CORE__TESTS__TMPDIR_PATH/termux-apps-info.env"
     if [[ "$termux_apps_info_env_file_export" == "true" ]]; then
-        termux_apps_info_env_file_create_command="printf '%s\n' '${termux_apps_info_env_file_content//\'/\'\\\'\'}' > '${termux_apps_info_env_file_path//\'/\'\\\'\'}'"
+        termux_apps_info_env_file_create_command="printf '%s\n' '${termux_apps_info_env_file_content//\'/\'\\\'\'}' > '${termux_apps_info_env_file_path//\'/\'\\\'\'}' || exit \$?"
         get_export_scoped_variable_command termux_apps_info_env_file_export_command "$TERMUX_ENV__S_ROOT" "CORE__" "APPS_INFO_ENV_FILE" "$termux_apps_info_env_file_path" || return $?
     else
-        termux_apps_info_env_file_create_command="printf '%s' '' > '${termux_apps_info_env_file_path//\'/\'\\\'\'}'"
+        termux_apps_info_env_file_create_command="printf '%s' '' > '${termux_apps_info_env_file_path//\'/\'\\\'\'}' || exit \$?"
         get_unset_scoped_variable_command termux_apps_info_env_file_export_command "$TERMUX_ENV__S_ROOT" "CORE__" "APPS_INFO_ENV_FILE" || return $?
     fi
 
@@ -3083,6 +3085,793 @@ termux_core__termux_apps_info_env_variable__test__termux_app__data_dir() {
     return 0
 
 }
+
+
+
+
+
+termux_core__termux_apps_info_app_version_name__run_tests() {
+
+    termux_core__tests__log 3 "termux_core__termux_apps_info_app_version_name()"
+
+    termux_core__sh__termux_apps_info_app_version_name__run_tests || return $?
+    termux_core__bash__termux_apps_info_app_version_name__run_tests || return $?
+
+    return 0
+
+}
+
+
+
+termux_core__sh__termux_apps_info_app_version_name__run_tests() {
+
+    termux_core__tests__log 3 "termux_core__sh__termux_apps_info_app_version_name()"
+
+    TTERMUX_CORE__TESTS__TEST_FUNC__FUNC_NAME="termux_core__sh__termux_apps_info_app_version_name__run_test"
+    unset TERMUX_CORE__TESTS__TEST_FUNC__SKIP_EXEC_TEST
+    unset TERMUX_CORE__TESTS__TEST_FUNC__SKIP_SOURCE_STDOUT_TEST
+    unset TERMUX_CORE__TESTS__TEST_FUNC__SKIP_SOURCE_VAR_TEST
+
+    termux_core__set_termux_core_test_scoped_env_variables__default || return $?
+    termux_core__sh__termux_apps_info_app_version_name__run_tests_for_scope || return $?
+
+    termux_core__set_termux_core_test_scoped_env_variables__foo || return $?
+    termux_core__sh__termux_apps_info_app_version_name__run_tests_for_scope || return $?
+
+    return 0
+
+}
+
+termux_core__sh__termux_apps_info_app_version_name__run_tests_for_scope() {
+
+    TERMUX_ENV__S_ROOT="$TERMUX_CORE__TESTS__TERMUX_ENV__S_ROOT"
+
+
+    termux_core__termux_apps_info_app_version_name__test__usage "usage" \
+        "APP__" "STRING" || return $?
+
+
+
+    # `TERMUX_APP__APP_VERSION_NAME`.
+    termux_core__termux_apps_info_app_version_name__test__app_version_name "termux-app_app-version-name" \
+        "APP__" "termux-app" "--posix-validator=\"p+=''|termux-[0-9]*\"" || return $?
+
+
+
+    # `TERMUX_API_APP__APP_VERSION_NAME`.
+    termux_core__termux_apps_info_app_version_name__test__app_version_name "termux-api-app_app-version-name" \
+        "API_APP__" "termux-api-app" "--posix-validator=\"p+=''|termux-[0-9]*\"" || return $?
+
+
+
+    # `TERMUX_FLOAT_APP__APP_VERSION_NAME`.
+    termux_core__termux_apps_info_app_version_name__test__app_version_name "termux-float-app_app-version-name" \
+        "FLOAT_APP__" "termux-float-app" "--posix-validator=\"p+=''|termux-[0-9]*\"" || return $?
+
+
+
+    # `TERMUX_GUI_APP__APP_VERSION_NAME`.
+    termux_core__termux_apps_info_app_version_name__test__app_version_name "termux-gui-app_app-version-name" \
+        "GUI_APP__" "termux-gui-app" "--posix-validator=\"p+=''|termux-[0-9]*\"" || return $?
+
+
+
+    # `TERMUX_TASKER_APP__APP_VERSION_NAME`.
+    termux_core__termux_apps_info_app_version_name__test__app_version_name "termux-tasker-app_app-version-name" \
+        "TASKER_APP__" "termux-tasker-app" "--posix-validator=\"p+=''|termux-[0-9]*\"" || return $?
+
+
+
+    # `TERMUX_WIDGET_APP__APP_VERSION_NAME`.
+    termux_core__termux_apps_info_app_version_name__test__app_version_name "termux-widget-app_app-version-name" \
+        "WIDGET_APP__" "termux-widget-app" "--posix-validator=\"p+=''|termux-[0-9]*\"" || return $?
+
+
+
+    # `TERMUX_X11_APP__APP_VERSION_NAME`.
+    termux_core__termux_apps_info_app_version_name__test__app_version_name "termux-x11-app_app-version-name" \
+        "X11_APP__" "termux-x11-app" "--posix-validator=\"p+=''|termux-[0-9]*\"" || return $?
+
+    return 0
+
+}
+
+termux_core__sh__termux_apps_info_app_version_name__run_test() {
+
+    termux_core__tests__validate_argument_count ge $# 7 termux_core__sh__termux_apps_info_app_version_name__run_test "$@" || return $?
+
+    local test_name="$1"
+    local pre_test_commands="$2"
+    local termux_apps_info_env_file_export="$3"
+    local termux_apps_info_env_file_content="$4"
+    local expected_exit_code="$5"
+    local expected_output_regex="$6"
+    local termux_core__sh__taiavn_command_type="$7"
+
+    local termux_apps_info_env_file_create_command
+    local termux_apps_info_env_file_export_command
+    local termux_apps_info_env_file_path
+    local termux_core__sh__taiavn_call_command
+    local termux_core__sh__taiavn_source_command
+    local termux_core__sh__taiavn_source_output_mode_arg=""
+    local termux_core__sh__taiavn_source_print_command=""
+
+    if [[ "$termux_core__sh__taiavn_command_type" == "get-value" ]]; then
+        termux_core__tests__validate_argument_count eq $# 10 \
+            "'termux_core__sh__termux_apps_info_app_version_name__run_test' for the '$termux_core__sh__taiavn_command_type' command" "$@" || return $?
+
+        local termux_core__sh__taiavn_options="$8"
+        local termux_core__sh__taiavn_source_output_mode="$9"
+        local termux_core__sh__taiavn_args="${10}"
+
+        if [[ "$termux_core__sh__taiavn_source_output_mode" == "_" ]]; then
+            termux_core__sh__taiavn_source_output_mode="output_variable"
+        fi
+
+        termux_core__sh__taiavn_source_output_mode_arg=" '$termux_core__sh__taiavn_source_output_mode'"
+
+        if [[ "$termux_core__sh__taiavn_source_output_mode" != "-" ]] && \
+                [[ "$termux_core__sh__taiavn_source_output_mode" != ">" ]]; then
+            termux_core__sh__taiavn_source_print_command="${NL}printf '%s' \"\${$termux_core__sh__taiavn_source_output_mode:-}\""
+        fi
+    elif [[ "$termux_core__sh__taiavn_command_type" == "unset-value" ]]; then
+        termux_core__tests__validate_argument_count eq $# 10 \
+            "'termux_core__sh__termux_apps_info_app_version_name__run_test' for the '$termux_core__sh__taiavn_command_type' command" "$@" || return $?
+
+        local termux_core__sh__taiavn_options="$8"
+        local termux_core__sh__taiavn_source_print_var="$9"
+        local termux_core__sh__taiavn_args="${10}"
+
+        if [[ "$termux_core__sh__taiavn_source_print_var" != "-" ]]; then
+            termux_core__sh__taiavn_source_print_command="${NL}printf '%s' \"\${$termux_core__sh__taiavn_source_print_var:-}\""
+        fi
+    fi
+
+
+    # shellcheck disable=SC2016
+    termux_core__sh__taiavn_source_command='source_file_from_path() { local source_file="${1:-}"; [ $# -gt 0 ] && shift 1; local source_path; if source_path="$(command -v "$source_file")" && [ -n "$source_path" ]; then . "$source_path" || return $?; else echo "Failed to find the '\''$source_file'\'' file to source." 1>&2; return 1; fi; }'"${NL}${NL}"'
+source_file_from_path "termux-apps-info-app-version-name.sh" --sourcing-script || exit $?'
+
+    termux_apps_info_env_file_path="$TERMUX_CORE__TESTS__TMPDIR_PATH/termux-apps-info.env"
+    if [[ "$termux_apps_info_env_file_export" == "true" ]]; then
+        termux_apps_info_env_file_create_command="printf '%s\n' '${termux_apps_info_env_file_content//\'/\'\\\'\'}' > '${termux_apps_info_env_file_path//\'/\'\\\'\'}'"
+        get_export_scoped_variable_command termux_apps_info_env_file_export_command "$TERMUX_ENV__S_ROOT" "CORE__" "APPS_INFO_ENV_FILE" "$termux_apps_info_env_file_path" || return $?
+    else
+        termux_apps_info_env_file_create_command="printf '%s' '' > '${termux_apps_info_env_file_path//\'/\'\\\'\'}'"
+        get_unset_scoped_variable_command termux_apps_info_env_file_export_command "$TERMUX_ENV__S_ROOT" "CORE__" "APPS_INFO_ENV_FILE" || return $?
+    fi
+
+    pre_test_commands="export TERMUX_ENV__S_ROOT='${TERMUX_ENV__S_ROOT//\'/\'\\\'\'}';${NL}
+unset TERMUX_ENV__S_APP;${NL}${NL}\
+${termux_apps_info_env_file_create_command}${NL}${NL}${termux_apps_info_env_file_export_command}${NL}${NL}\
+${pre_test_commands:+"$pre_test_commands${NL}${NL}"}"
+
+    termux_core__sh__taiavn_options="${termux_core__sh__taiavn_options:+"$termux_core__sh__taiavn_options "}"
+
+    if [[ "$termux_core__sh__taiavn_command_type" == "get-value" ]]; then
+        if [[ "$TERMUX_CORE__TESTS__TEST_FUNC__SKIP_EXEC_TEST" != "true" ]]; then
+            termux_core__sh__taiavn_call_command="termux-apps-info-app-version-name.sh"
+            termux_core__tests__run_script_test "termux_core__sh__taiavn__${test_name}__exec-stdout" \
+                "#!/bin/sh${NL}${NL}set -e -u${NL}${NL}${pre_test_commands}$termux_core__sh__taiavn_call_command '$termux_core__sh__taiavn_command_type' ${termux_core__sh__taiavn_options}'>' $termux_core__sh__taiavn_args" \
+                "$expected_exit_code" "$expected_output_regex" || return $?
+        fi
+
+        if [[ "$TERMUX_CORE__TESTS__TEST_FUNC__SKIP_SOURCE_STDOUT_TEST" != "true" ]]; then
+            termux_core__sh__taiavn_call_command="${termux_core__sh__taiavn_source_command}${NL}${NL}termux_core__sh__termux_apps_info_app_version_name"
+            termux_core__tests__run_script_test "termux_core__sh__taiavn__${test_name}__source-stdout" \
+                "#!/bin/sh${NL}${NL}set -e -u${NL}${NL}${pre_test_commands}$termux_core__sh__taiavn_call_command '$termux_core__sh__taiavn_command_type' ${termux_core__sh__taiavn_options}'>' $termux_core__sh__taiavn_args" \
+                "$expected_exit_code" "$expected_output_regex" || return $?
+        fi
+    fi
+
+    if [[ "$TERMUX_CORE__TESTS__TEST_FUNC__SKIP_SOURCE_VAR_TEST" != "true" ]]; then
+        termux_core__sh__taiavn_call_command="${termux_core__sh__taiavn_source_command}${NL}${NL}termux_core__sh__termux_apps_info_app_version_name"
+        termux_core__tests__run_script_test "termux_core__sh__taiavn__${test_name}__source-var" \
+            "#!/bin/sh${NL}${NL}set -e -u${NL}${NL}${pre_test_commands}$termux_core__sh__taiavn_call_command '$termux_core__sh__taiavn_command_type' ${termux_core__sh__taiavn_options}$termux_core__sh__taiavn_source_output_mode_arg $termux_core__sh__taiavn_args || exit \$?$termux_core__sh__taiavn_source_print_command" \
+            "$expected_exit_code" "$expected_output_regex" || return $?
+    fi
+
+    return 0
+
+}
+
+
+
+termux_core__bash__termux_apps_info_app_version_name__run_tests() {
+
+    termux_core__tests__log 3 "termux_core__bash__termux_apps_info_app_version_name()"
+
+    TTERMUX_CORE__TESTS__TEST_FUNC__FUNC_NAME="termux_core__bash__termux_apps_info_app_version_name__run_test"
+    unset TERMUX_CORE__TESTS__TEST_FUNC__SKIP_EXEC_TEST
+    unset TERMUX_CORE__TESTS__TEST_FUNC__SKIP_SOURCE_STDOUT_TEST
+    unset TERMUX_CORE__TESTS__TEST_FUNC__SKIP_SOURCE_VAR_TEST
+
+    termux_core__set_termux_core_test_scoped_env_variables__default || return $?
+    termux_core__bash__termux_apps_info_app_version_name__run_tests_for_scope || return $?
+
+    termux_core__set_termux_core_test_scoped_env_variables__foo || return $?
+    termux_core__bash__termux_apps_info_app_version_name__run_tests_for_scope || return $?
+
+    return 0
+
+}
+
+termux_core__bash__termux_apps_info_app_version_name__run_tests_for_scope() {
+
+    TERMUX_ENV__S_ROOT="$TERMUX_CORE__TESTS__TERMUX_ENV__S_ROOT"
+
+
+    termux_core__termux_apps_info_app_version_name__test__usage "usage" \
+        "APP__" "STRING" || return $?
+
+
+
+    # `TERMUX_APP__APP_VERSION_NAME`.
+    termux_core__termux_apps_info_app_version_name__test__app_version_name "termux-app_app-version-name" \
+        "APP__" "termux-app" "--extended-validator=\"r+=^(()|(termux-[0-9].*))$\"" || return $?
+
+
+
+    # `TERMUX_API_APP__APP_VERSION_NAME`.
+    termux_core__termux_apps_info_app_version_name__test__app_version_name "termux-api-app_app-version-name" \
+        "API_APP__" "termux-api-app" "--extended-validator=\"r+=^(()|(termux-[0-9].*))$\"" || return $?
+
+
+
+    # `TERMUX_FLOAT_APP__APP_VERSION_NAME`.
+    termux_core__termux_apps_info_app_version_name__test__app_version_name "termux-float-app_app-version-name" \
+        "FLOAT_APP__" "termux-float-app" "--extended-validator=\"r+=^(()|(termux-[0-9].*))$\"" || return $?
+
+
+
+    # `TERMUX_GUI_APP__APP_VERSION_NAME`.
+    termux_core__termux_apps_info_app_version_name__test__app_version_name "termux-gui-app_app-version-name" \
+        "GUI_APP__" "termux-gui-app" "--extended-validator=\"r+=^(()|(termux-[0-9].*))$\"" || return $?
+
+
+
+    # `TERMUX_TASKER_APP__APP_VERSION_NAME`.
+    termux_core__termux_apps_info_app_version_name__test__app_version_name "termux-tasker-app_app-version-name" \
+        "TASKER_APP__" "termux-tasker-app" "--extended-validator=\"r+=^(()|(termux-[0-9].*))$\"" || return $?
+
+
+
+    # `TERMUX_WIDGET_APP__APP_VERSION_NAME`.
+    termux_core__termux_apps_info_app_version_name__test__app_version_name "termux-widget-app_app-version-name" \
+        "WIDGET_APP__" "termux-widget-app" "--extended-validator=\"r+=^(()|(termux-[0-9].*))$\"" || return $?
+
+
+
+    # `TERMUX_X11_APP__APP_VERSION_NAME`.
+    termux_core__termux_apps_info_app_version_name__test__app_version_name "termux-x11-app_app-version-name" \
+        "X11_APP__" "termux-x11-app" "--extended-validator=\"r+=^(()|(termux-[0-9].*))$\"" || return $?
+
+    return 0
+
+}
+
+termux_core__bash__termux_apps_info_app_version_name__run_test() {
+
+    termux_core__tests__validate_argument_count ge $# 7 termux_core__bash__termux_apps_info_app_version_name__run_test "$@" || return $?
+
+    local test_name="$1"
+    local pre_test_commands="$2"
+    local termux_apps_info_env_file_export="$3"
+    local termux_apps_info_env_file_content="$4"
+    local expected_exit_code="$5"
+    local expected_output_regex="$6"
+    local termux_core__bash__taiavn_command_type="$7"
+
+    local termux_apps_info_env_file_create_command
+    local termux_apps_info_env_file_export_command
+    local termux_apps_info_env_file_path
+    local termux_core__bash__taiavn_call_command
+    local termux_core__bash__taiavn_source_command
+    local termux_core__bash__taiavn_source_output_mode_arg=""
+    local termux_core__bash__taiavn_source_print_command=""
+
+    if [[ "$termux_core__bash__taiavn_command_type" == "get-value" ]]; then
+        termux_core__tests__validate_argument_count eq $# 10 \
+            "'termux_core__bash__termux_apps_info_app_version_name__run_test' for the '$termux_core__bash__taiavn_command_type' command" "$@" || return $?
+
+        local termux_core__bash__taiavn_options="$8"
+        local termux_core__bash__taiavn_source_output_mode="$9"
+        local termux_core__bash__taiavn_args="${10}"
+
+        if [[ "$termux_core__bash__taiavn_source_output_mode" == "_" ]]; then
+            termux_core__bash__taiavn_source_output_mode="output_variable"
+        fi
+
+        termux_core__bash__taiavn_source_output_mode_arg=" '$termux_core__bash__taiavn_source_output_mode'"
+
+        if [[ "$termux_core__bash__taiavn_source_output_mode" != "-" ]] && \
+                [[ "$termux_core__bash__taiavn_source_output_mode" != ">" ]]; then
+            termux_core__bash__taiavn_source_print_command="${NL}printf '%s' \"\${$termux_core__bash__taiavn_source_output_mode:-}\""
+        fi
+    elif [[ "$termux_core__bash__taiavn_command_type" == "unset-value" ]]; then
+        termux_core__tests__validate_argument_count eq $# 10 \
+            "'termux_core__bash__termux_apps_info_app_version_name__run_test' for the '$termux_core__bash__taiavn_command_type' command" "$@" || return $?
+
+        local termux_core__bash__taiavn_options="$8"
+        local termux_core__bash__taiavn_source_print_var="$9"
+        local termux_core__bash__taiavn_args="${10}"
+
+        if [[ "$termux_core__bash__taiavn_source_print_var" != "-" ]]; then
+            termux_core__bash__taiavn_source_print_command="${NL}printf '%s' \"\${$termux_core__bash__taiavn_source_print_var:-}\""
+        fi
+    fi
+
+
+    # shellcheck disable=SC2016
+    termux_core__bash__taiavn_source_command='source_file_from_path() { local source_file="${1:-}"; [ $# -gt 0 ] && shift 1; local source_path; if source_path="$(command -v "$source_file")" && [ -n "$source_path" ]; then source "$source_path" || return $?; else echo "Failed to find the '\''$source_file'\'' file to source." 1>&2; return 1; fi; }'"${NL}${NL}"'
+source_file_from_path "termux-apps-info-app-version-name.bash" || exit $?'
+
+    termux_apps_info_env_file_path="$TERMUX_CORE__TESTS__TMPDIR_PATH/termux-apps-info.env"
+    if [[ "$termux_apps_info_env_file_export" == "true" ]]; then
+        termux_apps_info_env_file_create_command="printf '%s\n' '${termux_apps_info_env_file_content//\'/\'\\\'\'}' > '${termux_apps_info_env_file_path//\'/\'\\\'\'}'"
+        get_export_scoped_variable_command termux_apps_info_env_file_export_command "$TERMUX_ENV__S_ROOT" "CORE__" "APPS_INFO_ENV_FILE" "$termux_apps_info_env_file_path" || return $?
+    else
+        termux_apps_info_env_file_create_command="printf '%s' '' > '${termux_apps_info_env_file_path//\'/\'\\\'\'}'"
+        get_unset_scoped_variable_command termux_apps_info_env_file_export_command "$TERMUX_ENV__S_ROOT" "CORE__" "APPS_INFO_ENV_FILE" || return $?
+    fi
+
+    pre_test_commands="export TERMUX_ENV__S_ROOT='${TERMUX_ENV__S_ROOT//\'/\'\\\'\'}';${NL}
+unset TERMUX_ENV__S_APP;${NL}${NL}\
+${termux_apps_info_env_file_create_command}${NL}${NL}${termux_apps_info_env_file_export_command}${NL}${NL}\
+${pre_test_commands:+"$pre_test_commands${NL}${NL}"}"
+
+    termux_core__bash__taiavn_options="${termux_core__bash__taiavn_options:+"$termux_core__bash__taiavn_options "}"
+
+    if [[ "$termux_core__bash__taiavn_command_type" == "get-value" ]]; then
+        if [[ "$TERMUX_CORE__TESTS__TEST_FUNC__SKIP_EXEC_TEST" != "true" ]]; then
+            termux_core__bash__taiavn_call_command="termux-apps-info-app-version-name.bash"
+            termux_core__tests__run_script_test "termux_core__bash__taiavn__${test_name}__exec-stdout" \
+                "#!/bin/bash${NL}${NL}set -e -u${NL}${NL}${pre_test_commands}$termux_core__bash__taiavn_call_command '$termux_core__bash__taiavn_command_type' ${termux_core__bash__taiavn_options}'>' $termux_core__bash__taiavn_args" \
+                "$expected_exit_code" "$expected_output_regex" || return $?
+        fi
+
+        if [[ "$TERMUX_CORE__TESTS__TEST_FUNC__SKIP_SOURCE_STDOUT_TEST" != "true" ]]; then
+            termux_core__bash__taiavn_call_command="${termux_core__bash__taiavn_source_command}${NL}${NL}termux_core__bash__termux_apps_info_app_version_name"
+            termux_core__tests__run_script_test "termux_core__bash__taiavn__${test_name}__source-stdout" \
+                "#!/bin/bash${NL}${NL}set -e -u${NL}${NL}${pre_test_commands}$termux_core__bash__taiavn_call_command '$termux_core__bash__taiavn_command_type' ${termux_core__bash__taiavn_options}'>' $termux_core__bash__taiavn_args" \
+                "$expected_exit_code" "$expected_output_regex" || return $?
+        fi
+    fi
+
+    if [[ "$TERMUX_CORE__TESTS__TEST_FUNC__SKIP_SOURCE_VAR_TEST" != "true" ]]; then
+        termux_core__bash__taiavn_call_command="${termux_core__bash__taiavn_source_command}${NL}${NL}termux_core__bash__termux_apps_info_app_version_name"
+        termux_core__tests__run_script_test "termux_core__bash__taiavn__${test_name}__source-var" \
+            "#!/bin/bash${NL}${NL}set -e -u${NL}${NL}${pre_test_commands}$termux_core__bash__taiavn_call_command '$termux_core__bash__taiavn_command_type' ${termux_core__bash__taiavn_options}$termux_core__bash__taiavn_source_output_mode_arg $termux_core__bash__taiavn_args || exit \$?$termux_core__bash__taiavn_source_print_command" \
+            "$expected_exit_code" "$expected_output_regex" || return $?
+    fi
+
+    return 0
+
+}
+
+
+
+termux_core__termux_apps_info_app_version_name__test__usage() {
+
+    termux_core__tests__log 4 "${1}()"
+
+    termux_core__tests__validate_argument_count eq $# 3 termux_core__termux_apps_info_app_version_name__test__usage "$@" || return $?
+
+    local test_label="$1"
+    local var_sub_scope_name="$2"
+    local var_sub_name="$3"
+
+    local env_command
+    local env_file
+
+    "$TTERMUX_CORE__TESTS__TEST_FUNC__FUNC_NAME" "${test_label}_command_unset" \
+        "" \
+        "false" "" \
+        64 "^The command '' passed to \
+'termux_core__([a-z_]+)__termux_apps_info_app_version_name' is not valid\..*$" \
+        "" "" - "" || return $?
+
+    "$TTERMUX_CORE__TESTS__TEST_FUNC__FUNC_NAME" "${test_label}_command_invalid" \
+        "" \
+        "false" "" \
+        64 "^The command 'get-value1' passed to \
+'termux_core__([a-z_]+)__termux_apps_info_app_version_name' is not valid\..*$" \
+        get-value1 "" - "" || return $?
+
+
+
+    "$TTERMUX_CORE__TESTS__TEST_FUNC__FUNC_NAME" "${test_label}_get-value_command_args_invalid-less" \
+        "" \
+        "false" "" \
+        64 "^Invalid argument count 1 for the 'get-value' command\. The \
+'termux_core__([a-z_]+)__termux_apps_info_app_version_name' function expects 2 arguments\..*$" \
+        get-value "" - "" || return $?
+
+
+
+    TERMUX_CORE__TESTS__TEST_FUNC__SKIP_EXEC_TEST="true" TERMUX_CORE__TESTS__TEST_FUNC__SKIP_SOURCE_STDOUT_TEST="true"
+    "$TTERMUX_CORE__TESTS__TEST_FUNC__FUNC_NAME" "${test_label}_get-value_var-to-set_none" \
+        "" \
+        "false" "" \
+        64 "^The output_mode '' argument passed to \
+'termux_core__([a-z_]+)__termux_apps_info_app_version_name' is not a valid environment variable name, or equal to \`>\` or \`-\`\..*$" \
+        get-value "" "" 'ss="APP__"' || return $?
+    unset TERMUX_CORE__TESTS__TEST_FUNC__SKIP_EXEC_TEST TERMUX_CORE__TESTS__TEST_FUNC__SKIP_SOURCE_STDOUT_TEST
+
+    TERMUX_CORE__TESTS__TEST_FUNC__SKIP_EXEC_TEST="true" TERMUX_CORE__TESTS__TEST_FUNC__SKIP_SOURCE_STDOUT_TEST="true"
+    "$TTERMUX_CORE__TESTS__TEST_FUNC__FUNC_NAME" "${test_label}_get-value_var-to-set_invalid" \
+        "" \
+        "false" "" \
+        64 "^The output_mode '1foo' argument passed to \
+'termux_core__([a-z_]+)__termux_apps_info_app_version_name' is not a valid environment variable name, or equal to \`>\` or \`-\`\..*$" \
+        get-value "" "1foo" 'ss="APP__"' || return $?
+    unset TERMUX_CORE__TESTS__TEST_FUNC__SKIP_EXEC_TEST TERMUX_CORE__TESTS__TEST_FUNC__SKIP_SOURCE_STDOUT_TEST
+
+
+    TERMUX_CORE__TESTS__TEST_FUNC__SKIP_EXEC_TEST="true" TERMUX_CORE__TESTS__TEST_FUNC__SKIP_SOURCE_STDOUT_TEST="true"
+    get_export_scoped_variable_command env_command "$TERMUX_ENV__S_ROOT" "APP__" "APP_VERSION_NAME" "0.1.0" || return $?
+    "$TTERMUX_CORE__TESTS__TEST_FUNC__FUNC_NAME" "${test_label}_get-value_var-to-set_output-mode-stdout_value-valid" \
+        "$env_command" \
+        "false" "" \
+        0 "^0.\1\.0$" \
+        get-value "--skip-sourcing" ">" 'ss="APP__"' || return $?
+    unset TERMUX_CORE__TESTS__TEST_FUNC__SKIP_EXEC_TEST TERMUX_CORE__TESTS__TEST_FUNC__SKIP_SOURCE_STDOUT_TEST
+
+    TERMUX_CORE__TESTS__TEST_FUNC__SKIP_EXEC_TEST="true" TERMUX_CORE__TESTS__TEST_FUNC__SKIP_SOURCE_STDOUT_TEST="true"
+    get_export_scoped_variable_command env_command "$TERMUX_ENV__S_ROOT" "APP__" "APP_VERSION_NAME" "0.1.0" || return $?
+    "$TTERMUX_CORE__TESTS__TEST_FUNC__FUNC_NAME" "${test_label}_get-value_var-to-set_output-mode-dash_value-valid" \
+        "$env_command" \
+        "false" "" \
+        0 "^$" \
+        get-value "--skip-sourcing" "-" 'ss="APP__"' || return $?
+    unset TERMUX_CORE__TESTS__TEST_FUNC__SKIP_EXEC_TEST TERMUX_CORE__TESTS__TEST_FUNC__SKIP_SOURCE_STDOUT_TEST
+
+
+    TERMUX_CORE__TESTS__TEST_FUNC__SKIP_EXEC_TEST="true" TERMUX_CORE__TESTS__TEST_FUNC__SKIP_SOURCE_STDOUT_TEST="true"
+    get_export_scoped_variable_command env_command "TERMUX_" "ENV__" "S_APP" "${TERMUX_ENV__S_ROOT}DIFF_APP__" || return $?
+    append_export_scoped_variable_command env_command "$TERMUX_ENV__S_ROOT" "BAR_APP__" "APP_VERSION_NAME" "0.2.0" || return $?
+    get_export_scoped_variable_command env_file "$TERMUX_ENV__S_ROOT" "BAR_APP__" "APP_VERSION_NAME" "0.1.0" || return $?
+    "$TTERMUX_CORE__TESTS__TEST_FUNC__FUNC_NAME" "${test_label}_get-value_var-to-set_var-already-set_value-set" \
+        "$env_command" \
+        "true" "$env_file" \
+        0 "^0.\1\.0$" \
+        get-value "" "${TERMUX_ENV__S_ROOT}BAR_APP__APP_VERSION_NAME" 'ss="BAR_APP__"' || return $?
+    unset TERMUX_CORE__TESTS__TEST_FUNC__SKIP_EXEC_TEST TERMUX_CORE__TESTS__TEST_FUNC__SKIP_SOURCE_STDOUT_TEST
+
+    TERMUX_CORE__TESTS__TEST_FUNC__SKIP_EXEC_TEST="true" TERMUX_CORE__TESTS__TEST_FUNC__SKIP_SOURCE_STDOUT_TEST="true"
+    get_export_scoped_variable_command env_command "TERMUX_" "ENV__" "S_APP" "${TERMUX_ENV__S_ROOT}DIFF_APP__" || return $?
+    append_export_scoped_variable_command env_command "$TERMUX_ENV__S_ROOT" "BAR_APP__" "APP_VERSION_NAME" "0.2.0" || return $?
+    get_export_scoped_variable_command env_file "$TERMUX_ENV__S_ROOT" "BAR_APP__" "APP_VERSION_NAME" "" || return $?
+    "$TTERMUX_CORE__TESTS__TEST_FUNC__FUNC_NAME" "${test_label}_get-value_var-to-set_var-already-set_value-empty" \
+        "$env_command" \
+        "true" "$env_file" \
+        0 "^$" \
+        get-value "" "${TERMUX_ENV__S_ROOT}BAR_APP__APP_VERSION_NAME" 'ss="BAR_APP__"' || return $?
+    unset TERMUX_CORE__TESTS__TEST_FUNC__SKIP_EXEC_TEST TERMUX_CORE__TESTS__TEST_FUNC__SKIP_SOURCE_STDOUT_TEST
+
+    TERMUX_CORE__TESTS__TEST_FUNC__SKIP_EXEC_TEST="true" TERMUX_CORE__TESTS__TEST_FUNC__SKIP_SOURCE_STDOUT_TEST="true"
+    get_export_scoped_variable_command env_command "TERMUX_" "ENV__" "S_APP" "${TERMUX_ENV__S_ROOT}DIFF_APP__" || return $?
+    append_export_scoped_variable_command env_command "$TERMUX_ENV__S_ROOT" "BAR_APP__" "APP_VERSION_NAME" "0.2.0" || return $?
+    get_unset_scoped_variable_command env_file "$TERMUX_ENV__S_ROOT" "BAR_APP__" "APP_VERSION_NAME" || return $?
+    "$TTERMUX_CORE__TESTS__TEST_FUNC__FUNC_NAME" "${test_label}_get-value_var-to-set_var-already-set_value-unset" \
+        "$env_command" \
+        "true" "$env_file" \
+        0 "^$" \
+        get-value "" "${TERMUX_ENV__S_ROOT}BAR_APP__APP_VERSION_NAME" 'ss="BAR_APP__"' || return $?
+    unset TERMUX_CORE__TESTS__TEST_FUNC__SKIP_EXEC_TEST TERMUX_CORE__TESTS__TEST_FUNC__SKIP_SOURCE_STDOUT_TEST
+
+
+
+    "$TTERMUX_CORE__TESTS__TEST_FUNC__FUNC_NAME" "${test_label}_get-value_scope_none" \
+        "" \
+        "false" "" \
+        64 "^The scoped_var_scope_mode '' argument for the variable to get passed to \
+'termux_core__([a-z_]+)__termux_apps_info_env_variable' is not valid\..*$" \
+        get-value "" _ '""' || return $?
+
+    "$TTERMUX_CORE__TESTS__TEST_FUNC__FUNC_NAME" "${test_label}_get-value_scope_invalid-with-no-arg" \
+        "" \
+        "false" "" \
+        64 "^The scoped_var_scope_mode 't=' argument for the variable to get passed to \
+'termux_core__([a-z_]+)__termux_apps_info_env_variable' is not valid\..*$" \
+        get-value "" _ 't=' || return $?
+
+    "$TTERMUX_CORE__TESTS__TEST_FUNC__FUNC_NAME" "${test_label}_get-value_scope_invalid-with-arg" \
+        "" \
+        "false" "" \
+        64 "^The scoped_var_scope_mode 't=_' argument for the variable to get passed to \
+'termux_core__([a-z_]+)__termux_apps_info_env_variable' is not valid\..*$" \
+        get-value "" _ 't="_"' || return $?
+
+    "$TTERMUX_CORE__TESTS__TEST_FUNC__FUNC_NAME" "${test_label}_get-value_component-name_invalid-with-no-arg" \
+        "" \
+        "false" "" \
+        64 "^The scoped_var_scope_mode 'cn=' argument for the variable to get passed to \
+'termux_core__([a-z_]+)__termux_apps_info_env_variable' is not valid\..*$" \
+        get-value "" _ 'cn=' || return $?
+
+    "$TTERMUX_CORE__TESTS__TEST_FUNC__FUNC_NAME" "${test_label}_get-value_component-name_invalid-with-arg" \
+        "" \
+        "false" "" \
+        64 "^The scoped_var_scope_mode 'cn=foo' argument for the variable to get passed to \
+'termux_core__([a-z_]+)__termux_apps_info_env_variable' is not valid\..*$" \
+        get-value "" _ 'cn="foo"' || return $?
+
+
+
+    "$TTERMUX_CORE__TESTS__TEST_FUNC__FUNC_NAME" "${test_label}_get-value_scope-s_no-arg" \
+        "" \
+        "false" "" \
+        64 "^The scoped_var_scope_mode 's=' argument for the variable to get passed to \
+'termux_core__([a-z_]+)__termux_apps_info_env_variable' is not valid\..*$" \
+        get-value "" _ 's=""' || return $?
+
+
+    get_export_scoped_variable_command env_command "TERMUX_" "ENV__" "S_ROOT" "1" || return $?
+    "$TTERMUX_CORE__TESTS__TEST_FUNC__FUNC_NAME" "${test_label}_get-value_scope-s_var-root-scope-invalid" \
+        "$env_command" \
+        "false" "" \
+        0 "^$" \
+        get-value "--skip-sourcing" _ 's="BAR_APP__"' || return $?
+
+    get_export_scoped_variable_command env_command "TERMUX_" "ENV__" "S_ROOT" "BAR_" || return $?
+    "$TTERMUX_CORE__TESTS__TEST_FUNC__FUNC_NAME" "${test_label}_get-value_scope-s_var-sub-scope-invalid" \
+        "$env_command" \
+        "false" "" \
+        64 "^The name of the variable to unset 'BAR#_APP__APP_VERSION_NAME' generated in \
+'termux_core__([a-z_]+)__termux_scoped_env_variable' is not a valid environment variable name\..*$" \
+        get-value "" _ 's="BAR#_APP__"' || return $?
+
+
+
+    "$TTERMUX_CORE__TESTS__TEST_FUNC__FUNC_NAME" "${test_label}_get-value_scope-ss_no-arg" \
+        "" \
+        "false" "" \
+        64 "^The scoped_var_scope_mode 'ss=' argument for the variable to get passed to \
+'termux_core__([a-z_]+)__termux_apps_info_env_variable' is not valid\..*$" \
+        get-value "" _ 'ss=""' || return $?
+
+
+    get_export_scoped_variable_command env_command "TERMUX_" "ENV__" "S_ROOT" "1" || return $?
+    "$TTERMUX_CORE__TESTS__TEST_FUNC__FUNC_NAME" "${test_label}_get-value_scope-ss_var-root-scope-invalid" \
+        "$env_command" \
+        "false" "" \
+        1 "^The TERMUX_ENV__S_ROOT environment variable value '1' while running \
+'termux_core__([a-z_]+)__termux_scoped_env_variable' is not a valid environment variable name\..*$" \
+        get-value "" _ 'ss="APP__"' || return $?
+
+    get_export_scoped_variable_command env_command "TERMUX_" "ENV__" "S_ROOT" "BAR_" || return $?
+    "$TTERMUX_CORE__TESTS__TEST_FUNC__FUNC_NAME" "${test_label}_get-value_scope-ss_var-sub-scope-invalid" \
+        "$env_command" \
+        "false" "" \
+        64 "^The name of the variable to unset 'BAR_X#_APP__APP_VERSION_NAME' generated in \
+'termux_core__([a-z_]+)__termux_scoped_env_variable' is not a valid environment variable name\..*$" \
+        get-value "" _ 'ss="X#_APP__"' || return $?
+
+    return 0
+
+}
+
+
+
+termux_core__termux_apps_info_app_version_name__test__app_version_name() {
+
+    termux_core__tests__log 4 "${1}()"
+
+    termux_core__tests__validate_argument_count eq $# 4 termux_core__termux_apps_info_app_version_name__test__app_version_name "$@" || return $?
+
+    local test_label="$1"
+    local var_sub_scope_name="$2"
+    local scoped_var_scope_mode="$3"
+    local termux_core__validator__taiavn_args="$4"
+
+    local env_command
+    local env_file
+    local is_termux_app_scope
+    local test_type
+    local termux_core__taiavn__scope_args
+    local termux_version_env_command
+    local unset_termux_version_env_command="unset TERMUX_ENV__S_ROOT;"
+
+    local -A test_types=()
+    test_types["scope-s"]='s="'"${TERMUX_ENV__S_ROOT}${var_sub_scope_name}"'"'
+    test_types["scope-ss"]='ss="'"${var_sub_scope_name}"'"'
+    test_types["component-name"]='cn="'"${scoped_var_scope_mode}"'"'
+
+    for test_type in "${!test_types[@]}"; do
+        termux_core__taiavn__scope_args="${test_types["$test_type"]}"
+
+        if [[ "$termux_core__taiavn__scope_args" = ss="APP__" ]] || [[ "$termux_core__taiavn__scope_args" = cn="termux-app" ]]; then
+            is_termux_app_scope="true"
+            termux_version_env_command="unset TERMUX_VERSION;"
+        else
+            is_termux_app_scope="false"
+            termux_version_env_command=""
+        fi
+
+        # `--skip-sourcing`.
+        get_unset_scoped_variable_command env_command "$TERMUX_ENV__S_ROOT" "$var_sub_scope_name" "APP_VERSION_NAME" || return $?
+        get_export_scoped_variable_command env_file "$TERMUX_ENV__S_ROOT" "$var_sub_scope_name" "APP_VERSION_NAME" "0.1.0" || return $?
+        "$TTERMUX_CORE__TESTS__TEST_FUNC__FUNC_NAME" "${test_label}_get-value_skip-sourcing_${test_type}_env-unset" \
+            "${termux_version_env_command}${NL}${env_command}" \
+            "true" "$env_file" \
+            0 "^$" \
+            get-value "--skip-sourcing" _ "${termux_core__taiavn__scope_args}" || return $?
+
+        get_export_scoped_variable_command env_command "$TERMUX_ENV__S_ROOT" "$var_sub_scope_name" "APP_VERSION_NAME" "" || return $?
+        get_export_scoped_variable_command env_file "$TERMUX_ENV__S_ROOT" "$var_sub_scope_name" "APP_VERSION_NAME" "0.1.0" || return $?
+        "$TTERMUX_CORE__TESTS__TEST_FUNC__FUNC_NAME" "${test_label}_get-value_skip-sourcing_${test_type}_env-empty" \
+            "${termux_version_env_command}${NL}${env_command}" \
+            "true" "$env_file" \
+            0 "^$" \
+            get-value "--skip-sourcing" _ "${termux_core__taiavn__scope_args}" || return $?
+
+        get_export_scoped_variable_command env_command "$TERMUX_ENV__S_ROOT" "$var_sub_scope_name" "APP_VERSION_NAME" "0.2.0" || return $?
+        get_export_scoped_variable_command env_file "$TERMUX_ENV__S_ROOT" "$var_sub_scope_name" "APP_VERSION_NAME" "0.1.0" || return $?
+        "$TTERMUX_CORE__TESTS__TEST_FUNC__FUNC_NAME" "${test_label}_get-value_skip-sourcing_${test_type}_env-set" \
+            "${termux_version_env_command}${NL}${env_command}" \
+            "true" "$env_file" \
+            0 "^0\.2\.0$" \
+            get-value "--skip-sourcing" _ "${termux_core__taiavn__scope_args}" || return $?
+
+
+        get_export_scoped_variable_command env_command "$TERMUX_ENV__S_ROOT" "$var_sub_scope_name" "APP_VERSION_NAME" "termux-0.2.0" || return $?
+        get_export_scoped_variable_command env_file "$TERMUX_ENV__S_ROOT" "$var_sub_scope_name" "APP_VERSION_NAME" "termux-0.1.0" || return $?
+        "$TTERMUX_CORE__TESTS__TEST_FUNC__FUNC_NAME" "${test_label}_get-value_skip-sourcing_${test_type}_env-set_custom_validator" \
+            "${termux_version_env_command}${NL}${env_command}" \
+            "true" "$env_file" \
+            0 "^termux-0\.2\.0$" \
+            get-value "--skip-sourcing ${termux_core__validator__taiavn_args}" _ "${termux_core__taiavn__scope_args}" || return $?
+
+
+        get_export_scoped_variable_command env_command "$TERMUX_ENV__S_ROOT" "$var_sub_scope_name" "APP_VERSION_NAME" "0.1.0" || return $?
+        "$TTERMUX_CORE__TESTS__TEST_FUNC__FUNC_NAME" "${test_label}_unset-value_main-variable-set" \
+            "${termux_version_env_command}${NL}${env_command}" \
+            "false" "" \
+            0 "^$" \
+            unset-value "" "${TERMUX_ENV__S_ROOT}${var_sub_scope_name}APP_VERSION_NAME" "${termux_core__taiavn__scope_args}" || return $?
+
+
+        # `TERMUX_VERSION`.
+        if [[ "$is_termux_app_scope" == "true" ]]; then
+            get_unset_scoped_variable_command env_command "$TERMUX_ENV__S_ROOT" "$var_sub_scope_name" "APP_VERSION_NAME" || return $?
+            get_export_scoped_variable_command env_file "$TERMUX_ENV__S_ROOT" "$var_sub_scope_name" "APP_VERSION_NAME" "0.1.0" || return $?
+            "$TTERMUX_CORE__TESTS__TEST_FUNC__FUNC_NAME" "${test_label}_get-value_skip-sourcing_${test_type}_termux_version-unset_env-unset" \
+                "${unset_termux_version_env_command}${NL}${termux_version_env_command}${NL}${env_command}" \
+                "true" "$env_file" \
+                0 "^$" \
+                get-value "--skip-sourcing" _ "${termux_core__taiavn__scope_args}" || return $?
+
+            get_unset_scoped_variable_command env_command "$TERMUX_ENV__S_ROOT" "$var_sub_scope_name" "APP_VERSION_NAME" || return $?
+            get_export_scoped_variable_command env_file "$TERMUX_ENV__S_ROOT" "$var_sub_scope_name" "APP_VERSION_NAME" "0.1.0" || return $?
+            env_command+="${NL}export TERMUX_VERSION='0.2.0';"
+            "$TTERMUX_CORE__TESTS__TEST_FUNC__FUNC_NAME" "${test_label}_get-value_skip-sourcing_${test_type}_termux_version-set_env-set" \
+                "${unset_termux_version_env_command}${NL}${termux_version_env_command}${NL}${env_command}" \
+                "true" "$env_file" \
+                0 "^0\.2\.0$" \
+                get-value "--skip-sourcing" _ "${termux_core__taiavn__scope_args}" || return $?
+
+            get_export_scoped_variable_command env_command "$TERMUX_ENV__S_ROOT" "$var_sub_scope_name" "APP_VERSION_NAME" "0.1.0" || return $?
+            env_command+="${NL}export TERMUX_VERSION='0.2.0';"
+            "$TTERMUX_CORE__TESTS__TEST_FUNC__FUNC_NAME" "${test_label}_unset-value_termux_version-variable-set" \
+                "${termux_version_env_command}${NL}${env_command}" \
+                "false" "" \
+                0 "^$" \
+                unset-value "" "TERMUX_VERSION" "${termux_core__taiavn__scope_args}" || return $?
+        fi
+
+
+
+        # `--skip-sourcing-if-cur-app-var`.
+        get_export_scoped_variable_command env_command "TERMUX_" "ENV__" "S_APP" "${TERMUX_ENV__S_ROOT}${var_sub_scope_name}" || return $?
+        append_export_scoped_variable_command env_command "$TERMUX_ENV__S_ROOT" "${var_sub_scope_name}" "APP_VERSION_NAME" "0.2.0" || return $?
+        get_export_scoped_variable_command env_file "$TERMUX_ENV__S_ROOT" "${var_sub_scope_name}" "APP_VERSION_NAME" "0.1.0" || return $?
+        [[ "$is_termux_app_scope" == "true" ]] && env_command+="${NL}export TERMUX_VERSION='0.3.0';"
+        "$TTERMUX_CORE__TESTS__TEST_FUNC__FUNC_NAME" "${test_label}_get-value_skip-sourcing-if-cur-app-var_${test_type}_env-set_file-set_same-app" \
+            "${termux_version_env_command}${NL}${env_command}" \
+            "true" "$env_file" \
+            0 "^0\.2\.0$" \
+            get-value "" _ "${termux_core__taiavn__scope_args}" || return $?
+
+        get_export_scoped_variable_command env_command "TERMUX_" "ENV__" "S_APP" "${TERMUX_ENV__S_ROOT}DIFF_APP__" || return $?
+        append_export_scoped_variable_command env_command "$TERMUX_ENV__S_ROOT" "${var_sub_scope_name}" "APP_VERSION_NAME" "0.2.0" || return $?
+        get_export_scoped_variable_command env_file "$TERMUX_ENV__S_ROOT" "${var_sub_scope_name}" "APP_VERSION_NAME" "0.1.0" || return $?
+        [[ "$is_termux_app_scope" == "true" ]] && env_command+="${NL}export TERMUX_VERSION='0.3.0';"
+        "$TTERMUX_CORE__TESTS__TEST_FUNC__FUNC_NAME" "${test_label}_get-value_skip-sourcing-if-cur-app-var_${test_type}_env-set_file-set_different-app" \
+            "${termux_version_env_command}${NL}${env_command}" \
+            "true" "$env_file" \
+            0 "^0\.1\.0$" \
+            get-value "" _ "${termux_core__taiavn__scope_args}" || return $?
+
+        get_export_scoped_variable_command env_command "TERMUX_" "ENV__" "S_APP" "${TERMUX_ENV__S_ROOT}DIFF_APP__" || return $?
+        append_export_scoped_variable_command env_command "$TERMUX_ENV__S_ROOT" "${var_sub_scope_name}" "APP_VERSION_NAME" "0.2.0" || return $?
+        get_unset_scoped_variable_command env_file "$TERMUX_ENV__S_ROOT" "${var_sub_scope_name}" "APP_VERSION_NAME" || return $?
+        "$TTERMUX_CORE__TESTS__TEST_FUNC__FUNC_NAME" "${test_label}_get-value_skip-sourcing-if-cur-app-var_${test_type}_env-set_file-unset_different-app" \
+            "${termux_version_env_command}${NL}${env_command}" \
+            "true" "$env_file" \
+            0 "^$" \
+            get-value "" _ "${termux_core__taiavn__scope_args}" || return $?
+
+        get_export_scoped_variable_command env_command "TERMUX_" "ENV__" "S_APP" "${TERMUX_ENV__S_ROOT}${var_sub_scope_name}" || return $?
+        append_export_scoped_variable_command env_command "$TERMUX_ENV__S_ROOT" "${var_sub_scope_name}" "APP_VERSION_NAME" "b" || return $?
+        get_export_scoped_variable_command env_file "$TERMUX_ENV__S_ROOT" "${var_sub_scope_name}" "APP_VERSION_NAME" "a" || return $?
+        "$TTERMUX_CORE__TESTS__TEST_FUNC__FUNC_NAME" "${test_label}_get-value_skip-sourcing-if-cur-app-var_${test_type}_env-invalid_file-invalid_same-app" \
+            "${termux_version_env_command}${NL}${env_command}" \
+            "true" "$env_file" \
+            81 "^Failed to find a valid value .*$" \
+            get-value "" _ "${termux_core__taiavn__scope_args}" || return $?
+
+        get_export_scoped_variable_command env_command "TERMUX_" "ENV__" "S_APP" "${TERMUX_ENV__S_ROOT}DIFF_APP__" || return $?
+        append_export_scoped_variable_command env_command "$TERMUX_ENV__S_ROOT" "${var_sub_scope_name}" "APP_VERSION_NAME" "b" || return $?
+        get_export_scoped_variable_command env_file "$TERMUX_ENV__S_ROOT" "${var_sub_scope_name}" "APP_VERSION_NAME" "a" || return $?
+        "$TTERMUX_CORE__TESTS__TEST_FUNC__FUNC_NAME" "${test_label}_get-value_skip-sourcing-if-cur-app-var_${test_type}_env-invalid_file-invalid_different-app" \
+            "${termux_version_env_command}${NL}${env_command}" \
+            "true" "$env_file" \
+            81 "^Failed to find a valid value .*$" \
+            get-value "" _ "${termux_core__taiavn__scope_args}" || return $?
+
+
+        get_export_scoped_variable_command env_command "TERMUX_" "ENV__" "S_APP" "${TERMUX_ENV__S_ROOT}DIFF_APP__" || return $?
+        append_export_scoped_variable_command env_command "$TERMUX_ENV__S_ROOT" "${var_sub_scope_name}" "APP_VERSION_NAME" "termux-0.2.0" || return $?
+        get_export_scoped_variable_command env_file "$TERMUX_ENV__S_ROOT" "${var_sub_scope_name}" "APP_VERSION_NAME" "termux-0.1.0" || return $?
+        "$TTERMUX_CORE__TESTS__TEST_FUNC__FUNC_NAME" "${test_label}_get-value_skip-sourcing-if-cur-app-var_${test_type}_env-set_file-set_different-app_custom_validator" \
+            "${termux_version_env_command}${NL}${env_command}" \
+            "true" "$env_file" \
+            0 "^termux-0\.1\.0$" \
+            get-value "${termux_core__validator__taiavn_args}" _ "${termux_core__taiavn__scope_args}" || return $?
+
+
+        # `TERMUX_VERSION`.
+        if [[ "$is_termux_app_scope" == "true" ]]; then
+            get_export_scoped_variable_command env_command "TERMUX_" "ENV__" "S_APP" "${TERMUX_ENV__S_ROOT}${var_sub_scope_name}" || return $?
+            append_unset_scoped_variable_command env_command "$TERMUX_ENV__S_ROOT" "${var_sub_scope_name}" "APP_VERSION_NAME" "0.2.0" || return $?
+            get_unset_scoped_variable_command env_file "$TERMUX_ENV__S_ROOT" "${var_sub_scope_name}" "APP_VERSION_NAME" || return $?
+            env_command+="${NL}export TERMUX_VERSION='0.1.0';"
+            "$TTERMUX_CORE__TESTS__TEST_FUNC__FUNC_NAME" "${test_label}_get-value_skip-sourcing-if-cur-app-var_${test_type}_termux_version-set_env-unset_file-unset_same-app" \
+                "${unset_termux_version_env_command}${NL}${termux_version_env_command}${NL}${env_command}" \
+                "true" "$env_file" \
+                0 "^0\.1\.0$" \
+                get-value "" _ "${termux_core__taiavn__scope_args}" || return $?
+
+            get_export_scoped_variable_command env_command "TERMUX_" "ENV__" "S_APP" "${TERMUX_ENV__S_ROOT}${var_sub_scope_name}" || return $?
+            append_unset_scoped_variable_command env_command "$TERMUX_ENV__S_ROOT" "${var_sub_scope_name}" "APP_VERSION_NAME" "0.2.0" || return $?
+            get_unset_scoped_variable_command env_file "$TERMUX_ENV__S_ROOT" "${var_sub_scope_name}" "APP_VERSION_NAME" || return $?
+            "$TTERMUX_CORE__TESTS__TEST_FUNC__FUNC_NAME" "${test_label}_get-value_skip-sourcing-if-cur-app-var_${test_type}_termux_version-unset_env-unset_file-unset_same-app" \
+                "${unset_termux_version_env_command}${NL}${termux_version_env_command}${NL}${env_command}" \
+                "true" "$env_file" \
+                0 "^$" \
+                get-value "" _ "${termux_core__taiavn__scope_args}" || return $?
+
+
+            get_export_scoped_variable_command env_command "TERMUX_" "ENV__" "S_APP" "${TERMUX_ENV__S_ROOT}DIFF_APP__" || return $?
+            append_export_scoped_variable_command env_command "$TERMUX_ENV__S_ROOT" "${var_sub_scope_name}" "APP_VERSION_NAME" "0.2.0" || return $?
+            get_unset_scoped_variable_command env_file "$TERMUX_ENV__S_ROOT" "${var_sub_scope_name}" "APP_VERSION_NAME" || return $?
+            env_command+="${NL}export TERMUX_VERSION='0.1.0';"
+            "$TTERMUX_CORE__TESTS__TEST_FUNC__FUNC_NAME" "${test_label}_get-value_skip-sourcing-if-cur-app-var_${test_type}_termux_version-set_env-set_file-unset_different-app" \
+                "${unset_termux_version_env_command}${NL}${termux_version_env_command}${NL}${env_command}" \
+                "true" "$env_file" \
+                0 "^0\.1\.0$" \
+                get-value "" _ "${termux_core__taiavn__scope_args}" || return $?
+
+            get_export_scoped_variable_command env_command "TERMUX_" "ENV__" "S_APP" "${TERMUX_ENV__S_ROOT}DIFF_APP__" || return $?
+            append_export_scoped_variable_command env_command "$TERMUX_ENV__S_ROOT" "${var_sub_scope_name}" "APP_VERSION_NAME" "0.2.0" || return $?
+            get_unset_scoped_variable_command env_file "$TERMUX_ENV__S_ROOT" "${var_sub_scope_name}" "APP_VERSION_NAME" || return $?
+            "$TTERMUX_CORE__TESTS__TEST_FUNC__FUNC_NAME" "${test_label}_get-value_skip-sourcing-if-cur-app-var_${test_type}_termux_version-unset_env-set_file-unset_different-app" \
+                "${unset_termux_version_env_command}${NL}${termux_version_env_command}${NL}${env_command}" \
+                "true" "$env_file" \
+                0 "^$" \
+                get-value "" _ "${termux_core__taiavn__scope_args}" || return $?
+        fi
+    done
+
+    return 0
+
+}
+
+
+
+
+
 ##
 # `termux_core__tests__run_script_test` `<test_name>` `<test_file_content>`
 #   `<expected_exit_code>` `<expected_output_regex>` [`<script_args...>`]

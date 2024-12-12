@@ -1,0 +1,165 @@
+#!@TERMUX__PREFIX@/bin/bash
+# shellcheck shell=bash
+
+if [ -z "${BASH_VERSION:-}" ]; then
+    echo "The 'termux-apps-info-app-version-name.bash' script must be run from a 'bash' shell."; return 64 2>/dev/null|| exit 64 # EX__USAGE
+fi
+
+##
+# `termux_core__bash__termux_apps_info_app_version_name__show_help`
+##
+termux_core__bash__termux_apps_info_app_version_name__show_help() {
+
+    cat <<'HELP_EOF'
+termux-apps-info-app-version-name.bash can be used to get/unset
+variable values of the app version name environment variables
+`*_APP__APP_VERSION_NAME` for Termux app `TERMUX_APP__`, its plugin
+apps `TERMUX_*_APP__` and external apps `*_APP__` app scoped that
+exist in the `termux-apps-info.env` file, with support for validation
+of values.
+
+
+Usage:
+  termux-apps-info-app-version-name.bash <command> <args...>
+
+
+Available commands:
+    get-value                    Get app version name value from
+                                 Termux scoped variable.
+    unset-value                  Unset Termux scoped variable value
+                                 for app version name.
+
+
+
+get-value:
+  termux-apps-info-app-version-name.bash get-value [<command_options>] \
+    <output_mode> \
+    <scoped_var_scope_mode>
+
+Available command options:
+  [ --skip-sourcing ]
+                     Skip sourcing of `termux-apps-info.env` file
+                     before getting value. By default, the
+                     '--skip-sourcing-if-cur-app-var' flag is passed
+                     to 'termux-apps-info-env-variable.bash' instead.
+  [ --extended-validator=<validator> ]
+                     The extended validator to pass to
+                     'termux-scoped-env-variable.bash' for validation
+                     of app version name value. By default, the value
+                     must start with a number.
+
+
+
+unset-value:
+  termux-apps-info-app-version-name.bash unset-value \
+    <scoped_var_scope_mode>
+
+
+
+The `get-value` command type returns the value for the Termux scoped
+environment variable generated for the app version name depending on
+the variable scope passed and and the sub name as `APP_VERSION_NAME`.
+The value is read from the environment if app scope of the variable
+to get is the same as the app scope of the current app set in the
+`$TERMUX_ENV__S_APP` environment variable, otherwise
+`termux-apps-info.env` file is sourced first before reading the value
+unless the `--skip-sourcing` flag is passed. If the environment
+variable is not set (like in case app is not installed) or is set to a
+valid app version name starting with a number (default) or matches the
+custom validator passed with the `--extended-validator` argument, then
+call will return with exit code `0`. If its set, but not to a valid
+app version name, then the call will return with exit code
+`81` (`C_EX__NOT_FOUND`).
+
+The `unset-value` command type unsets the value of the Termux scoped
+environment variable generated for the app version name by running the
+`unset` command.
+
+The `unset-value` command type is not available if executing the
+`termux-apps-info-app-version-name.bash` script as that will not have
+any effect on the calling process environment and is only available if
+the script is sourced and the
+`termux_core__bash__termux_apps_info_app_version_name` function is
+called.
+
+Check the help of `termux-apps-info-env-variable.sh` and
+`termux-scoped-env-variable.sh` commands for info on the arguments for
+the `get-value` and `unset-value` command types.
+
+
+
+**See Also:**
+- @TERMUX_CORE_PKG__REPO_URL@/blob/master/site/pages/en/projects/docs/usage/utils/termux-apps-info-app-version-name.md
+- @TERMUX_CORE_PKG__REPO_URL@/blob/master/src/scripts/termux-apps-info-app-version-name.bash.in
+- @TERMUX_PACKAGES__REPO_URL@/blob/master/packages/termux-core/src/scripts/termux_core__bash__termux_apps_info_app_version_name
+.
+- @TERMUX_CORE_PKG__REPO_URL@/blob/master/site/pages/en/projects/docs/usage/utils/termux-apps-info-env-variable.md
+- @TERMUX_CORE_PKG__REPO_URL@/blob/master/src/scripts/termux-apps-info-env-variable.bash.in
+- @TERMUX_PACKAGES__REPO_URL@/blob/master/packages/termux-core/src/scripts/termux_core__bash__termux_apps_info_env_variable
+.
+- @TERMUX_CORE_PKG__REPO_URL@/blob/master/site/pages/en/projects/docs/usage/utils/termux-scoped-env-variable.md
+- @TERMUX_CORE_PKG__REPO_URL@/blob/master/src/scripts/termux-scoped-env-variable.bash.in
+- @TERMUX_PACKAGES__REPO_URL@/blob/master/packages/termux-core/src/scripts/termux_core__bash__termux_scoped_env_variable
+HELP_EOF
+
+}
+
+##
+# `termux_core__bash__termux_apps_info_app_version_name__main` [`<argument...>`]
+##
+termux_core__bash__termux_apps_info_app_version_name__main() {
+
+    local return_value
+
+    if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+        termux_core__bash__termux_apps_info_app_version_name__show_help || return $?
+        return 0
+    elif [ "$1" = "--version" ]; then
+        echo "@TERMUX_CORE_PKG__VERSION@" || return $?
+        return 0
+    elif [ "$1" = "unset-value" ]; then
+        echo "The '$1' command cannot be run if executing the 'termux-apps-info-app-version-name.bash' script." 1>&2
+        return 80 # C_EX__UNSUPPORTED
+    else
+        termux_core__bash__termux_apps_info_app_version_name "$@"
+        return_value=$?
+        if [ $return_value -eq 64 ]; then # EX__USAGE
+            echo ""
+            termux_core__bash__termux_apps_info_app_version_name__show_help
+        fi
+        return $return_value
+    fi
+
+}
+
+##### @TERMUX_CORE__BASH__TERMUX_APPS_INFO_APP_VERSION_NAME@ to be replaced at build time. #####
+
+
+
+##
+# Check if script is sourced.
+# - https://stackoverflow.com/a/28776166/14686958
+# - https://stackoverflow.com/a/29835459/14686958
+#
+# To source the `termux-apps-info-app-version-name.bash` file in `$PATH`
+# (with `.` or `source` command), run the following commands.
+# The `command -v` command is used to find the location of the script
+# file instead of directly using the `.`/`source` command to prevent
+# sourcing of a (malicious) file in the current working directory with
+# the same name instead of the one in `$PATH`.
+# A separate function is used to source so that arguments passed to
+# calling script/function are not passed to the sourced script.
+# Replace `exit` with `return` if running inside a function.
+# ```shell
+# source_file_from_path() { local source_file="${1:-}"; [ $# -gt 0 ] && shift 1; local source_path; if source_path="$(command -v "$source_file")" && [ -n "$source_path" ]; then source "$source_path" || return $?; else echo "Failed to find the '$source_file' file to source." 1>&2; return 1; fi; }
+# source_file_from_path "termux-apps-info-app-version-name.bash" || exit $?
+# ```
+##
+
+# If script is sourced, return with success, otherwise call main function.
+if (return 0 2>/dev/null); then
+    return 0 # EX__SUCCESS
+else
+    termux_core__bash__termux_apps_info_app_version_name__main "$@"
+    exit $?
+fi
