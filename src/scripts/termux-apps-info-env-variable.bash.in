@@ -1,0 +1,155 @@
+#!@TERMUX__PREFIX@/bin/bash
+# shellcheck shell=bash
+
+if [ -z "${BASH_VERSION:-}" ]; then
+    echo "The 'termux-apps-info-env-variable.bash' script must be run from a 'bash' shell."; return 64 2>/dev/null|| exit 64 # EX__USAGE
+fi
+
+##
+# `termux_core__bash__termux_apps_info_env_variable__show_help`
+##
+termux_core__bash__termux_apps_info_env_variable__show_help() {
+
+    cat <<'HELP_EOF'
+termux-apps-info-env-variable.bash can be used to source the
+`termux-apps-info.env` file into the current environment or get
+variable values of Termux app `TERMUX_APP__`, its plugin apps
+`TERMUX_*_APP__` and external apps `*_APP__` app scoped environment
+variables that exist in the `termux-apps-info.env` file, with
+support for fallback values and validation of values.
+
+
+Usage:
+  termux-apps-info-env-variable.bash <command> <args...>
+
+
+Available commands:
+    source-env                   Source the apps info environment.
+    get-value                    Get Termux scoped variable value.
+
+
+
+source-env:
+  termux-apps-info-env-variable.bash source-env \
+    <output_mode> \
+    <scoped_var_scope_mode> <scoped_var_sub_name>
+
+
+
+get-value:
+  termux-apps-info-env-variable.bash get-value [<command_options>] \
+    <output_mode> \
+    <scoped_var_scope_mode> <scoped_var_sub_name> \
+    <extended_validator> [<default_values...>]
+
+Available command options:
+  [ --skip-sourcing ]
+                     Skip sourcing of `termux-apps-info.env` file
+                     before getting value.
+  [ --skip-sourcing-if-cur-app-var ]
+                     Skip sourcing of `termux-apps-info.env` file
+                     before getting value if app scope of the variable
+                     to get is the same as the app scope of the
+                     current app set in the `$TERMUX_ENV__S_APP`
+                     environment variable.
+
+
+
+The `source-env` command type sources the `termux-apps-info.env` into
+the current environment.
+
+The `get-value` command type returns the value for the Termux scoped
+environment variable generated depending on the variable scope and sub
+name passed. First its value is read from the environment after
+optionally sourcing the `termux-apps-info.env`  file depending on
+`--skip-sourcing*` flags, followed by reading the optional values
+passed as `default_values`, and whichever value first matches the
+`extended_validator` is returned and if no value matches, then the
+call will return with exit code `81` (`C_EX__NOT_FOUND`).
+The `scoped_var_scope_mode` argument must be set, and for scope mode
+(`s=`) and sub scope mode (`ss=`), the values must end with `_APP__`,
+and for the component name mode (`cn=`), the value must end with
+`-app`.
+
+The `source-env` command type is not available if executing the
+`termux-apps-info-env-variable.bash` script as that will not have any
+effect on the calling process environment and is only available if
+the script is sourced and the
+`termux_core__bash__termux_apps_info_env_variable` function is called.
+
+Check the help of `termux-scoped-env-variable.bash` command for info
+on the arguments for the `get-value` command type.
+
+
+
+**See Also:**
+- @TERMUX_CORE_PKG__REPO_URL@/blob/master/site/pages/en/projects/docs/usage/utils/termux-apps-info-env-variable.md
+- @TERMUX_CORE_PKG__REPO_URL@/blob/master/src/scripts/termux-apps-info-env-variable.bash.in
+- @TERMUX_PACKAGES__REPO_URL@/blob/master/packages/termux-core/src/scripts/termux_core__bash__termux_apps_info_env_variable
+.
+- @TERMUX_CORE_PKG__REPO_URL@/blob/master/site/pages/en/projects/docs/usage/utils/termux-scoped-env-variable.md
+- @TERMUX_CORE_PKG__REPO_URL@/blob/master/src/scripts/termux-scoped-env-variable.bash.in
+- @TERMUX_PACKAGES__REPO_URL@/blob/master/packages/termux-core/src/scripts/termux_core__bash__termux_scoped_env_variable
+HELP_EOF
+
+}
+
+##
+# `termux_core__bash__termux_apps_info_env_variable__main` [`<argument...>`]
+##
+termux_core__bash__termux_apps_info_env_variable__main() {
+
+    local return_value
+
+    if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+        termux_core__bash__termux_apps_info_env_variable__show_help || return $?
+        return 0
+    elif [ "$1" = "--version" ]; then
+        echo "@TERMUX_CORE_PKG__VERSION@" || return $?
+        return 0
+    elif [ "$1" = "source-env" ]; then
+        echo "The '$1' command cannot be run if executing the 'termux-apps-info-env-variable.bash' script." 1>&2
+        return 80 # C_EX__UNSUPPORTED
+    else
+        termux_core__bash__termux_apps_info_env_variable "$@"
+        return_value=$?
+        if [ $return_value -eq 64 ]; then # EX__USAGE
+            echo ""
+            termux_core__bash__termux_apps_info_env_variable__show_help
+        fi
+        return $return_value
+    fi
+
+}
+
+##### @TERMUX_CORE__BASH__TERMUX_APPS_INFO_ENV_VARIABLE@ to be replaced at build time. #####
+
+
+
+##
+# Check if script is sourced.
+# - https://stackoverflow.com/a/28776166/14686958
+# - https://stackoverflow.com/a/29835459/14686958
+#
+# To source the `termux-apps-info-env-variable.bash` file in `$PATH`
+# (with `.` or `source` command), run the following commands.
+# The `command -v` command is used to find the location of the script
+# file instead of directly using the `.`/`source` command to prevent
+# sourcing of a (malicious) file in the current working directory with
+# the same name instead of the one in `$PATH`.
+# A separate function is used to source so that arguments passed to
+# calling script/function are not passed to the sourced script.
+# Replace `exit` with `return` if running inside a function.
+# ```shell
+# source_file_from_path() { local source_file="${1:-}"; [ $# -gt 0 ] && shift 1; local source_path; if source_path="$(command -v "$source_file")" && [ -n "$source_path" ]; then source "$source_path" || return $?; else echo "Failed to find the '$source_file' file to source." 1>&2; return 1; fi; }
+# source_file_from_path "termux-apps-info-env-variable.bash" || exit $?
+# ```
+##
+
+# If script is sourced, return with success, otherwise call main function.
+if (return 0 2>/dev/null); then
+    return 0 # EX__SUCCESS
+else
+    termux_core__bash__termux_apps_info_env_variable__main "$@"
+    exit $?
+fi
