@@ -1,0 +1,766 @@
+#!@TERMUX__PREFIX@/bin/bash
+# shellcheck shell=bash
+
+if [ -z "${BASH_VERSION:-}" ]; then
+    echo "The 'termux-core-tests' script must be run from a 'bash' shell."; return 64 2>/dev/null|| exit 64 # EX__USAGE
+fi
+
+termux_core__tests__init() {
+
+TERMUX_CORE__TESTS__COMMAND_TYPE_ID="" # Default: ``
+TERMUX_CORE__TESTS__COMMAND_TYPE_NOOP="false" # Default: `false`
+
+NL=$'\n'
+
+TERMUX_CORE__TESTS__TEST_FILTER=""
+TERMUX_CORE__TESTS__NO_CLEAN="false" # Default: `false`
+TERMUX_CORE__TESTS__TESTS_COUNT="0"
+
+TERMUX_CORE__TESTS__NAME_MAX=255
+TERMUX_CORE__TESTS__REGEX__ABSOLUTE_PATH='^(/[^/]+)+$'
+TERMUX_CORE__TESTS__REGEX__ROOTFS_OR_ABSOLUTE_PATH='^((/)|((/[^/]+)+))$'
+TERMUX_CORE__TESTS__REGEX__APP_PACKAGE_NAME="^[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_]*)+$"
+
+
+
+# Set `TERMUX_*` variables to environment variables exported by
+# Termux app, otherwise default to build time placeholders.
+# This is done to support scoped and dynamic variables design.
+# The `TERMUX_ENV__*` variables still use build time placeholders.
+
+TERMUX_ENV__S_ROOT="@TERMUX_ENV__S_ROOT@"
+
+
+TERMUX_APP__PACKAGE_NAME___N="@TERMUX_ENV__S_TERMUX_APP@PACKAGE_NAME"
+termux_core__tests__copy_variable TERMUX_APP__PACKAGE_NAME "$TERMUX_APP__PACKAGE_NAME___N" || return $?
+{ [[ ! "$TERMUX_APP__PACKAGE_NAME" =~ $TERMUX_CORE__TESTS__REGEX__APP_PACKAGE_NAME ]] || \
+    [ "${#TERMUX_APP__PACKAGE_NAME}" -gt $TERMUX_CORE__TESTS__NAME_MAX ]; } && \
+TERMUX_APP__PACKAGE_NAME="@TERMUX_APP__PACKAGE_NAME@"
+
+
+TERMUX_APP__DATA_DIR___N="@TERMUX_ENV__S_TERMUX_APP@DATA_DIR"
+termux_core__tests__copy_variable TERMUX_APP__DATA_DIR "$TERMUX_APP__DATA_DIR___N" || return $?
+[[ ! "$TERMUX_APP__DATA_DIR" =~ $TERMUX_CORE__TESTS__REGEX__ABSOLUTE_PATH ]] && \
+TERMUX_APP__DATA_DIR="@TERMUX_APP__DATA_DIR@"
+
+
+TERMUX__ROOTFS___N="@TERMUX_ENV__S_TERMUX@ROOTFS"
+termux_core__tests__copy_variable TERMUX__ROOTFS "$TERMUX__ROOTFS___N" || return $?
+[[ ! "$TERMUX__ROOTFS" =~ $TERMUX_CORE__TESTS__REGEX__ROOTFS_OR_ABSOLUTE_PATH ]] && \
+TERMUX__ROOTFS="@TERMUX__ROOTFS@"
+
+TERMUX__HOME___N="@TERMUX_ENV__S_TERMUX@HOME"
+termux_core__tests__copy_variable TERMUX__HOME "$TERMUX__HOME___N" || return $?
+[[ ! "$TERMUX__HOME" =~ $TERMUX_CORE__TESTS__REGEX__ABSOLUTE_PATH ]] && \
+TERMUX__HOME="@TERMUX__HOME@"
+
+TERMUX__PREFIX___N="@TERMUX_ENV__S_TERMUX@PREFIX"
+termux_core__tests__copy_variable TERMUX__PREFIX "$TERMUX__PREFIX___N" || return $?
+[[ ! "$TERMUX__PREFIX" =~ $TERMUX_CORE__TESTS__REGEX__ABSOLUTE_PATH ]] && \
+TERMUX__PREFIX="@TERMUX__PREFIX@"
+
+
+TERMUX_CORE__TESTS__LOG_LEVEL___N="@TERMUX_ENV__S_TERMUX_CORE__TESTS@LOG_LEVEL"
+termux_core__tests__copy_variable TERMUX_CORE__TESTS__LOG_LEVEL "$TERMUX_CORE__TESTS__LOG_LEVEL___N" || return $?
+
+
+TERMUX_CORE__TESTS__TESTS_PATH___N="@TERMUX_ENV__S_TERMUX_CORE__TESTS@TESTS_PATH"
+TERMUX_CORE__TESTS__TESTS_PATH="$TERMUX__PREFIX/libexec/installed-tests/termux-core"
+printf -v "$TERMUX_CORE__TESTS__TESTS_PATH___N" "%s" "$TERMUX_CORE__TESTS__TESTS_PATH" || return $?
+export "${TERMUX_CORE__TESTS__TESTS_PATH___N?}" || return $?
+
+
+TERMUX_CORE__TESTS__MAX_LOG_LEVEL=5 # Default: `5` (VVVERBOSE=5)
+{ [[ ! "$TERMUX_CORE__TESTS__LOG_LEVEL" =~ ^[0-9]+$ ]] || [[ "$TERMUX_CORE__TESTS__LOG_LEVEL" -gt "$TERMUX_CORE__TESTS__MAX_LOG_LEVEL" ]]; } && \
+TERMUX_CORE__TESTS__LOG_LEVEL=1 # Default: `1` (OFF=0, NORMAL=1, DEBUG=2, VERBOSE=3, VVERBOSE=4 and VVVERBOSE=5)
+
+
+
+# Set exit traps.
+termux_core__tests__set_traps || return $?
+
+}
+
+
+
+function termux_core__tests__log() { local log_level="${1}"; shift; if [[ $TERMUX_CORE__TESTS__LOG_LEVEL -ge $log_level ]]; then echo "@TERMUX__LNAME@-core-tests:" "$@"; fi }
+function termux_core__tests__log_literal() { local log_level="${1}"; shift; if [[ $TERMUX_CORE__TESTS__LOG_LEVEL -ge $log_level ]]; then echo -e "@TERMUX__LNAME@-core-tests:" "$@"; fi }
+function termux_core__tests__log_error() { echo "@TERMUX__LNAME@-core-tests:" "$@" 1>&2; }
+
+
+##
+# `termux_core__tests__main` [`<argument...>`]
+##
+termux_core__tests__main() {
+
+    local return_value
+
+    termux_core__tests__init || return $?
+
+    local run_runtime_tests="false"
+
+    # Process the command arguments passed to the script.
+    termux_core__tests__process_script_arguments "$@" || return $?
+    if [ "$TERMUX_CORE__TESTS__COMMAND_TYPE_NOOP" = "true" ]; then return 0; fi
+
+
+    termux_core__tests__log 4 "Running 'termux_core__tests__main'"
+
+    if [[ "$TERMUX_CORE__TESTS__COMMAND_TYPE_ID" == *,* ]] || \
+            [[ ",runtime,all," != *",$TERMUX_CORE__TESTS__COMMAND_TYPE_ID,"* ]]; then
+        termux_core__tests__log_error "Invalid command type id '$TERMUX_CORE__TESTS__COMMAND_TYPE_ID' passed. Must equal 'runtime' or 'all'."
+        return 1
+    fi
+
+
+    termux_core__tests__log 1 "Running 'termux-core' tests"
+
+    local tests_start_time
+    local tests_end_time
+    tests_start_time="$(date "+%s")" || return $?
+
+    [[ ",runtime,all," == *",$TERMUX_CORE__TESTS__COMMAND_TYPE_ID,"* ]] && run_runtime_tests="true"
+
+    termux_core__tests__log 5 "$TERMUX_CORE__TESTS__LOG_LEVEL___N='$TERMUX_CORE__TESTS__LOG_LEVEL'"
+    [[ -n "$TERMUX_CORE__TESTS__TEST_FILTER" ]] && termux_core__tests__log 5 "$TERMUX_CORE__TESTS__TEST_FILTER='$TERMUX_CORE__TESTS__TEST_FILTER'"
+    termux_core__tests__log 5 "$TERMUX_CORE__TESTS__TESTS_PATH___N='$TERMUX_CORE__TESTS__TESTS_PATH'"
+
+
+    # Set `TERMUX_CORE__TESTS__TESTS_PATH.
+    if [[ ! "$TERMUX_CORE__TESTS__TESTS_PATH" =~ $TERMUX_CORE__TESTS__REGEX__ROOTFS_OR_ABSOLUTE_PATH ]]; then
+        termux_core__tests__log_error "The TERMUX_CORE__TESTS__TESTS_PATH '$TERMUX_CORE__TESTS__TESTS_PATH' is either not set or is not an absolute path"
+        return 1
+    fi
+
+
+    # Setup variables for runtime tests.
+    if [[ "$run_runtime_tests" == "true" ]]; then
+        if [[ ! -d "$TMPDIR" ]]; then
+            termux_core__tests__log_error "The TMPDIR '$TMPDIR' is either not set or not a directory"
+            return 1
+        fi
+
+
+        TERMUX_CORE__TESTS__TMPDIR_PATH="$TMPDIR/termux-core-tests"
+
+        # Ensure test directory is clean and does not contain files from previous run.
+        rm -rf "$TERMUX_CORE__TESTS__TMPDIR_PATH" || return $?
+        mkdir -p "$TERMUX_CORE__TESTS__TMPDIR_PATH" || return $?
+    fi
+
+    TERMUX_CORE__TESTS__SCRIPT_TEST_FILE_NAME="test-script"
+    TERMUX_CORE__TESTS__SCRIPT_TEST_FILE_PATH="$TERMUX_CORE__TESTS__TMPDIR_PATH/$TERMUX_CORE__TESTS__SCRIPT_TEST_FILE_NAME"
+
+
+    # Run runtime tests.
+    if [[ "$run_runtime_tests" == "true" ]]; then
+        termux_core__tests__runtime_tests__run_command
+        return_value=$?
+        if [ $return_value -ne 0 ]; then
+            return $return_value
+        fi
+
+        rm -rf "$TERMUX_CORE__TESTS__TMPDIR_PATH"
+    fi
+
+    tests_end_time=$(($(date "+%s") - tests_start_time)) || return $?
+    termux_core__tests__log 1 "All $TERMUX_CORE__TESTS__TESTS_COUNT 'termux-core' tests successful in \
+$((tests_end_time / 3600 )) hours $(((tests_end_time % 3600) / 60)) minutes $((tests_end_time % 60)) seconds"
+
+    return 0
+
+}
+
+
+
+##
+# `termux_core__tests__runtime_tests__run_command`
+##
+termux_core__tests__runtime_tests__run_command() {
+
+    local return_value
+
+    termux_core__tests__log 2 "Running 'runtime' tests"
+
+    return 0
+
+}
+
+termux_core__set_termux_core_test_scoped_env_variables__default() {
+
+    TERMUX_CORE__TESTS__TERMUX_ENV__S_ROOT="$TERMUX_ENV__S_ROOT"
+    TERMUX_CORE__TESTS__TERMUX__PACKAGE_NAME="$TERMUX_APP__PACKAGE_NAME"
+    TERMUX_CORE__TESTS__TERMUX_APP__DATA_DIR="$TERMUX_APP__DATA_DIR"
+    TERMUX_CORE__TESTS__TERMUX__ROOTFS="$TERMUX__ROOTFS"
+    TERMUX_CORE__TESTS__TERMUX__HOME="$TERMUX__HOME"
+    TERMUX_CORE__TESTS__TERMUX__PREFIX="$TERMUX__PREFIX"
+
+}
+
+termux_core__set_termux_core_test_scoped_env_variables__foo() {
+
+    TERMUX_CORE__TESTS__TERMUX_ENV__S_ROOT="FOO_"
+    TERMUX_CORE__TESTS__TERMUX__PACKAGE_NAME="com.foo"
+    TERMUX_CORE__TESTS__TERMUX_APP__DATA_DIR="/data/data/com.foo"
+    TERMUX_CORE__TESTS__TERMUX__ROOTFS="$TERMUX_CORE__TESTS__TERMUX_APP__DATA_DIR/termux/rootfs/0"
+    TERMUX_CORE__TESTS__TERMUX__HOME="$TERMUX_CORE__TESTS__TERMUX__ROOTFS/home"
+    TERMUX_CORE__TESTS__TERMUX__PREFIX="$TERMUX_CORE__TESTS__TERMUX__ROOTFS/usr"
+
+}
+
+
+
+
+
+
+
+
+
+
+##
+# `termux_core__tests__run_script_test` `<test_name>` `<test_file_content>`
+#   `<expected_exit_code>` `<expected_output_regex>` [`<script_args...>`]
+##
+termux_core__tests__run_script_test() {
+
+    local return_value
+
+    if [[ $# -lt 4 ]]; then
+        termux_core__tests__log_error "Invalid argument count $#. The 'termux_core__tests__run_script_test' command expects at least 4 arguments: \
+ test_name test_file_content expected_exit_code expected_output_regex [script_args]"
+        return 1
+    fi
+
+    local test_name="$1"
+    local test_file_content="$2"
+    local expected_exit_code="$3"
+    local expected_output_regex="$4"
+    shift 4 # Remove args before `script_args`
+
+    local output
+    local actual_output
+    local test_failed="false"
+
+    if [[ -n "$TERMUX_CORE__TESTS__TEST_FILTER" ]] && [[ ! "$test_name" =~ $TERMUX_CORE__TESTS__TEST_FILTER ]]; then
+        return 0
+    fi
+
+    TERMUX_CORE__TESTS__TESTS_COUNT=$((TERMUX_CORE__TESTS__TESTS_COUNT + 1))
+
+    termux_core__tests__log 5 "$test_name()"
+    termux_core__tests__log 5 "TERMUX_CORE__TESTS__SCRIPT_TEST_FILE_PATH='$TERMUX_CORE__TESTS__SCRIPT_TEST_FILE_PATH'"
+    if [[ "$test_file_content" == *"${NL}"* ]]; then
+        termux_core__tests__log 5 "test_file_content=${NL}"'```'"${NL}$test_file_content${NL}"'```'
+    else
+        termux_core__tests__log 5 "test_file_content='$test_file_content'"
+    fi
+    termux_core__tests__log 5 "expected_exit_code='$expected_exit_code'"
+    termux_core__tests__log 5 "expected_output_regex='$expected_output_regex'"
+
+    # If TERMUX_CORE__TESTS__SCRIPT_TEST_FILE_PATH is not a valid absolute path.
+    if [[ ! "$TERMUX_CORE__TESTS__SCRIPT_TEST_FILE_PATH" =~ $TERMUX_CORE__TESTS__REGEX__ABSOLUTE_PATH ]]; then
+        termux_core__tests__log_error "The TERMUX_CORE__TESTS__SCRIPT_TEST_FILE_PATH '$TERMUX_CORE__TESTS__SCRIPT_TEST_FILE_PATH' is not a valid absolute path"
+        return 1
+    fi
+
+    rm -f "$TERMUX_CORE__TESTS__SCRIPT_TEST_FILE_PATH" || return $?
+
+    output="$(printf "%s" "$test_file_content" > "$TERMUX_CORE__TESTS__SCRIPT_TEST_FILE_PATH" 2>&1)"
+    return_value=$?
+    if [ $return_value -ne 0 ]; then
+        termux_core__tests__log_error "$output"
+        termux_core__tests__log_error "Failed to create the '$TERMUX_CORE__TESTS__SCRIPT_TEST_FILE_PATH' file for the '$test_name' test"
+        return $return_value
+    fi
+
+    output="$(chmod +x "$TERMUX_CORE__TESTS__SCRIPT_TEST_FILE_PATH" 2>&1)"
+    return_value=$?
+    if [ $return_value -ne 0 ]; then
+        termux_core__tests__log_error "$output"
+        termux_core__tests__log_error "Failed to set the executable bit for the '$TERMUX_CORE__TESTS__SCRIPT_TEST_FILE_PATH' file for the '$test_name' test"
+        return $return_value
+    fi
+
+    actual_output="$("$TERMUX_CORE__TESTS__SCRIPT_TEST_FILE_PATH" "$@" 2>&1)"
+    actual_exit_code=$?
+    if [[ -n "$expected_output_regex" ]] && [[ ! "$actual_output" =~ $expected_output_regex ]]; then
+        termux_core__tests__log_error "FAILED: '$test_name' test"
+        termux_core__tests__log_error "Expected output_regex does not equal match actual output"
+        test_failed="true"
+    elif [ $actual_exit_code != "$expected_exit_code" ]; then
+        termux_core__tests__log_error "$actual_output"
+        termux_core__tests__log_error "FAILED: '$test_name' test"
+        termux_core__tests__log_error "Expected result_code does not equal actual result_code"
+        test_failed="true"
+    fi
+
+    if [[ "$test_failed" == "true" ]]; then
+        if [[ "$test_file_content" == *"${NL}"* ]]; then
+            termux_core__tests__log_error "test_file_content=${NL}"'```'"${NL}$test_file_content${NL}"'```'
+        else
+            termux_core__tests__log_error "test_file_content='$test_file_content'"
+        fi
+        termux_core__tests__log_error "actual_exit_code: '$actual_exit_code'"
+        termux_core__tests__log_error "expected_exit_code: '$expected_exit_code'"
+        termux_core__tests__log_error "actual_output: '$actual_output'"
+        termux_core__tests__log_error "expected_output_regex: '$expected_output_regex'"
+        return 100
+    else
+        #termux_core__tests__log 2 "PASSED"
+
+        # Remove test file so that later tests do not accidentally use it.
+        rm -f "$TERMUX_CORE__TESTS__SCRIPT_TEST_FILE_PATH" || return $?
+
+        return 0
+    fi
+
+}
+
+
+
+
+
+##
+# `get_export_scoped_variable_command` `<output_variable_name>` \
+#     `<var_root_scope_name>` `<var_sub_scope_name>` `<var_sub_name>` \
+#     `<var_value>`
+##
+get_export_scoped_variable_command() {
+
+    termux_core__tests__validate_argument_count eq $# 5 get_export_scoped_variable_command "$@" || return $?
+
+    local output_variable_name="$1"
+    local var_root_scope_name="$2"
+    local var_sub_scope_name="$3"
+    local var_sub_name="$4"
+    local var_value="$5"
+
+    printf -v "$output_variable_name" "%s" \
+        "export ${var_root_scope_name}${var_sub_scope_name}${var_sub_name}='${var_value//\'/\'\\\'\'}';" || return $?
+
+    return 0
+
+}
+
+##
+# `append_export_scoped_variable_command` `<output_variable_name>` \
+#     `<var_root_scope_name>` `<var_sub_scope_name>` `<var_sub_name>` \
+#     `<var_value>`
+##
+append_export_scoped_variable_command() {
+
+    termux_core__tests__validate_argument_count eq $# 5 append_export_scoped_variable_command "$@" || return $?
+
+    local output_variable_name="$1"
+    local var_root_scope_name="$2"
+    local var_sub_scope_name="$3"
+    local var_sub_name="$4"
+    local var_value="$5"
+
+    local __command
+
+    get_export_scoped_variable_command __command "$var_root_scope_name" "$var_sub_scope_name" "$var_sub_name" "$var_value" || return $?
+
+    printf -v "$output_variable_name" "%s" \
+        "${!output_variable_name:-}${NL}${__command}" || return $?
+
+    return 0
+
+}
+
+
+
+##
+# `get_unset_scoped_variable_command` `<output_variable_name>` \
+#     `<var_root_scope_name>` `<var_sub_scope_name>` `<var_sub_name>`
+##
+get_unset_scoped_variable_command() {
+
+    termux_core__tests__validate_argument_count eq $# 4 get_unset_scoped_variable_command "$@" || return $?
+
+    local output_variable_name="$1"
+    local var_root_scope_name="$2"
+    local var_sub_scope_name="$3"
+    local var_sub_name="$4"
+
+    printf -v "$output_variable_name" "%s" \
+        "unset ${var_root_scope_name}${var_sub_scope_name}${var_sub_name};" || return $?
+
+    return 0
+
+}
+
+##
+# `append_unset_scoped_variable_command` `<output_variable_name>` \
+#     `<var_root_scope_name>` `<var_sub_scope_name>` `<var_sub_name>`
+##
+append_unset_scoped_variable_command() {
+
+    termux_core__tests__validate_argument_count eq $# 4 append_unset_scoped_variable_command "$@" || return $?
+
+    local output_variable_name="$1"
+    local var_root_scope_name="$2"
+    local var_sub_scope_name="$3"
+    local var_sub_name="$4"
+
+    local __command
+
+    get_unset_scoped_variable_command __command "$var_root_scope_name" "$var_sub_scope_name" "$var_sub_name" || return $?
+
+    printf -v "$output_variable_name" "%s" \
+        "${!output_variable_name:-}${NL}${__command}" || return $?
+
+    return 0
+
+}
+
+
+
+
+
+##
+# Source a file under `$PATH`, like under `TERMUX__PREFIX/bin`.
+#
+# A separate function is used to source so that arguments passed to
+# calling script/function are not passed to the sourced script.
+#
+#
+# termux_core__tests__source_file_from_path <file_name>
+##
+termux_core__tests__source_file_from_path() {
+
+    local source_file="${1:-}"; [ $# -gt 0 ] && shift 1;
+
+    local source_path
+
+    if source_path="$(command -v "$source_file")" && [ -n "$source_path" ]; then
+        # shellcheck disable=SC1090
+        source "$source_path" || return $?
+    else
+        echo "Failed to find the '$source_file' file to source." 1>&2
+        return 1
+    fi
+
+}
+
+
+
+
+
+##
+# Copy the value of a variable to another variable.
+#
+#
+# **Parameters:**
+# `output_variable_name` - The name of the output variable to set.
+# `input_variable_name` - The name of the input variable to read.
+#
+# **Returns:**
+# Returns `0` if successful, otherwise returns with a non-zero exit code.
+#
+#
+# `termux_core__tests__copy_variable` `<output_variable_name>` `<input_variable_name>`
+##
+termux_core__tests__copy_variable() {
+
+    local output_variable_name="${1:-}"
+    local input_variable_name="${2:-}"
+
+    if [[ ! "$output_variable_name" =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]]; then
+        echo "The output_variable_name '$output_variable_name' is not a valid shell variable name while running 'termux_core__tests__copy_variable'." 1>&2
+        return 1
+    fi
+
+    if [[ ! "$input_variable_name" =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]]; then
+        echo "The input_variable_name '$input_variable_name' is not a valid shell variable name while running 'termux_core__tests__copy_variable'." 1>&2
+        return 1
+    fi
+
+    eval "$output_variable_name"=\"\$\{"$input_variable_name":-\}\"
+
+}
+
+
+
+
+
+##
+# Escape '\$[](){}|^.?+*' in a string with backslashes so that it can
+# be used as a literal string in regex.
+#
+#
+# `termux_core__tests__escape_string_for_regex` `<string>`
+##
+termux_core__tests__escape_string_for_regex() {
+
+    printf "%s" "$1" | sed -zE -e 's/[][\.|$(){}?+*^]/\\&/g'
+
+}
+
+
+
+
+
+##
+# `termux_core__tests__get_arguments_string` `<output_variable_name>` `<arguments...>`
+##
+termux_core__tests__get_arguments_string() {
+
+    local output_variable_name="${1:-}"
+    shift 1
+
+    local argument
+    local __arguments_string=""
+    local i=1
+
+    while [ $# -ne 0 ]; do
+        argument="$1"
+        __arguments_string="$__arguments_string$i: \`$argument\`"
+
+        if [ $# -gt 1 ]; then
+            __arguments_string="$__arguments_string$NL"
+        fi
+
+        i=$((i + 1))
+        shift
+    done
+
+    printf -v "$output_variable_name" "%s" "$__arguments_string" || return $?
+
+}
+
+##
+# `termux_core__tests__print_arguments_string` `<arguments...>`
+##
+termux_core__tests__print_arguments_string() {
+
+    local arguments_string=""
+    termux_core__tests__get_arguments_string arguments_string "$@" || return $?
+     printf "%s\n" "$arguments_string"
+
+}
+
+##
+# `termux_core__tests__validate_argument_count` `eq`|`lt`|`le`|`gt`|`ge` `<arguments_received_count>` `<arguments_actual>` `<label>` [`<arguments_received>`]
+# `termux_core__tests__validate_argument_count` `or` `<arguments_received_count>` `<arguments_actual_1>` `<arguments_actual_2>` `<label>` [`<arguments_received>`]
+# `termux_core__tests__validate_argument_count` `between` `<arguments_received_count>` `<arguments_actual_min>` `<arguments_actual_max>` `<label>` [`<arguments_received>`]
+##
+termux_core__tests__validate_argument_count() {
+
+    local return_value=0
+
+    case "$1" in
+        eq) if [ "$2" -eq "$3" ]; then :; else
+                local label="$4"; case "$label" in *[!a-zA-Z0-9_-]*) :;; *) label="'$label'";;esac;
+                termux_core__tests__log_error "Invalid argument count '$2' to $label. Expected '$3' argument(s)."; shift 4; return_value=1; fi;;
+        lt) if [ "$2" -lt "$3" ]; then :; else
+                local label="$4"; case "$label" in *[!a-zA-Z0-9_-]*) :;; *) label="'$label'";;esac;
+                termux_core__tests__log_error "Invalid argument count '$2' to $label. Expected less than '$3' argument(s)."; shift 4; return_value=1; fi;;
+        le) if [ "$2" -le "$3" ]; then :; else
+                local label="$4"; case "$label" in *[!a-zA-Z0-9_-]*) :;; *) label="'$label'";;esac;
+                termux_core__tests__log_error "Invalid argument count '$2' to $label. Expected less than or equal to '$3' argument(s)."; shift 4; return_value=1; fi;;
+        gt) if [ "$2" -gt "$3" ]; then :; else
+                local label="$4"; case "$label" in *[!a-zA-Z0-9_-]*) :;; *) label="'$label'";;esac;
+                termux_core__tests__log_error "Invalid argument count '$2' to $label. Expected greater than '$3' argument(s)."; shift 4; return_value=1; fi;;
+        ge) if [ "$2" -ge "$3" ]; then :; else
+                local label="$4"; case "$label" in *[!a-zA-Z0-9_-]*) :;; *) label="'$label'";;esac;
+                termux_core__tests__log_error "Invalid argument count '$2' to $label. Expected greater than or equal to '$3' argument(s)."; shift 4; return_value=1; fi;;
+        or) if [ "$2" -eq "$3" ] || [ "$2" -eq "$4" ]; then :; else
+                local label="$5"; case "$label" in *[!a-zA-Z0-9_-]*) :;; *) label="'$label'";;esac;
+                termux_core__tests__log_error "Invalid argument count '$2' to $label. Expected '$3' or '$4' argument(s)."; shift 5; return_value=1; fi;;
+        between) if [ "$2" -ge "$3" ] && [ "$2" -le "$4" ]; then :; else
+                local label="$5"; case "$label" in *[!a-zA-Z0-9_-]*) :;; *) label="'$label'";;esac;
+                termux_core__tests__log_error "Invalid argument count '$2' to $label. Expected between '$3' and '$4' (inclusive) argument(s)."; shift 5; return_value=1; fi;;
+        *)
+            termux_core__tests__log_error "The comparison '$1' while running 'termux_core__tests__validate_argument_count' is invalid"; return 1;;
+    esac
+
+    [ $return_value -eq 0 ] && return 0
+
+    if [ $# -gt 0 ]; then
+        termux_core__tests__print_arguments_string "$@" || return $?
+    fi
+
+    return $return_value
+
+}
+
+
+
+
+
+##
+# Set exit traps to `termux_core__tests__traps()`.
+##
+termux_core__tests__set_traps() {
+
+    # Set traps to `termux_core__tests__traps`.
+    trap 'termux_core__tests__traps' EXIT
+    trap 'termux_core__tests__traps TERM' TERM
+    trap 'termux_core__tests__traps INT' INT
+    trap 'termux_core__tests__traps HUP' HUP
+    trap 'termux_core__tests__traps QUIT' QUIT
+
+    return 0
+
+}
+
+termux_core__tests__traps_killtree() {
+
+    local signal="$1"; local pid="$2"; local cpid
+    for cpid in $(pgrep -P "$pid"); do termux_core__tests__traps_killtree "$signal" "$cpid"; done
+    [[ "$pid" != "$$" ]] && signal="${signal:=15}"; kill "-$signal" "$pid" 2>/dev/null
+
+}
+
+termux_core__tests__traps() {
+
+    local exit_code=$?
+    trap - EXIT
+
+    if [[ "${TERMUX_CORE__TESTS__TMPDIR_PATH:-}" =~ ^(/[^/]+)+$ ]] && [[ "$TERMUX_CORE__TESTS__NO_CLEAN" != "true" ]]; then
+        rm -rf "$TERMUX_CORE__TESTS__TMPDIR_PATH"
+    fi
+
+    [ -n "$1" ] && trap - "$1";
+    termux_core__tests__traps_killtree "$1" $$;
+    exit $exit_code
+
+}
+
+
+
+
+
+##
+# `termux_core__tests__process_script_arguments` [`<argument...>`]
+##
+termux_core__tests__process_script_arguments() {
+
+    local opt; local opt_arg; local OPTARG; local OPTIND
+
+    if [ $# -eq 0 ]; then
+        TERMUX_CORE__TESTS__COMMAND_TYPE_NOOP="true"
+        show_help; return $?
+    fi
+
+    # Parse options to main command.
+    while getopts ":hqv-:" opt; do
+        opt_arg="${OPTARG:-}"
+        case "${opt}" in
+            -)
+                case "${OPTARG}" in *?=*) opt_arg="${OPTARG#*=}";; *) opt_arg="";; esac
+                case "${OPTARG}" in
+                    help)
+                        TERMUX_CORE__TESTS__COMMAND_TYPE_NOOP="true"
+                        show_help; return $?
+                        ;;
+                    version)
+                        TERMUX_CORE__TESTS__COMMAND_TYPE_NOOP="true"
+                        echo "@TERMUX_CORE_PKG__VERSION@"; return $?
+                        ;;
+                    quiet)
+                        TERMUX_CORE__TESTS__LOG_LEVEL=0
+                        ;;
+                    no-clean)
+                        TERMUX_CORE__TESTS__NO_CLEAN="true"
+                        ;;
+                    test-filter=?*)
+                        TERMUX_CORE__TESTS__TEST_FILTER="$opt_arg" || return $?
+                        ;;
+                    test-filter | test-filter=)
+                        termux_core__tests__log_error "No parameters set for option: '--${OPTARG%=*}'"
+                        return 1
+                        ;;
+                    tests-path=?*)
+                        TERMUX_CORE__TESTS__TESTS_PATH="$(readlink -f -- "$opt_arg")" || return $?
+                        ;;
+                    tests-path | tests-path=)
+                        termux_core__tests__log_error "No parameters set for option: '--${OPTARG%=*}'"
+                        return 1
+                        ;;
+                    '')
+                        # End of options `--`.
+                        break
+                        ;;
+                    *)
+                        termux_core__tests__log_error "Unknown option: '--${OPTARG:-}'."
+                        return 1
+                        ;;
+                esac
+                ;;
+            h)
+                TERMUX_CORE__TESTS__COMMAND_TYPE_NOOP="true"
+                show_help; return $?
+                ;;
+            q)
+                TERMUX_CORE__TESTS__LOG_LEVEL=0
+                ;;
+            v)
+                if [ "$TERMUX_CORE__TESTS__LOG_LEVEL" -lt "$TERMUX_CORE__TESTS__MAX_LOG_LEVEL" ]; then
+                    TERMUX_CORE__TESTS__LOG_LEVEL=$((TERMUX_CORE__TESTS__LOG_LEVEL+1));
+                else
+                    termux_core__tests__log_error "Invalid option, max log level is $TERMUX_CORE__TESTS__MAX_LOG_LEVEL"
+                    return 1
+                fi
+                ;;
+            \?)
+                :;;
+        esac
+    done
+    shift $((OPTIND - 1)) # Remove already processed arguments from argument list
+
+    if [ $# -eq 0 ]; then
+        termux_core__tests__log_error "The command type not passed."
+        return 1
+    elif [ $# -ne 1 ]; then
+        termux_core__tests__log_error "Expected 1 argument for command type but passed: $*"
+        return 1
+    fi
+
+    TERMUX_CORE__TESTS__COMMAND_TYPE_ID="$1"
+
+    return 0;
+
+}
+
+##
+# `show_help`
+##
+show_help() {
+
+    cat <<'HELP_EOF'
+termux-core-tests is a script that run tests for the termux-core.
+
+
+Usage:
+    termux-core-tests [command_options] <command>
+
+Available commands:
+    runtime                   Run runtime on-device tests.
+    all                       Run all tests.
+
+Available command_options:
+    [ -h | --help ]           Display this help screen.
+    [ --version ]             Display version.
+    [ -q | --quiet ]          Set log level to 'OFF'.
+    [ -v | -vv | -vvv | -vvvvv ]
+                              Set log level to 'DEBUG', 'VERBOSE',
+                              'VVERBOSE' and 'VVVERBOSE'.
+    [ --no-clean ]            Do not clean test files on failure.
+    [ --tests-filter=<filter> ]
+                              Regex to filter which tests to run.
+    [ --tests-path=<path> ]   The path to installed-tests directory.
+HELP_EOF
+
+}
+
+# If script is sourced, return with success, otherwise call main function.
+# - https://stackoverflow.com/a/28776166/14686958
+# - https://stackoverflow.com/a/29835459/14686958
+if (return 0 2>/dev/null); then
+    return 0 # EX__SUCCESS
+else
+    termux_core__tests__main "$@"
+    exit $?
+fi
