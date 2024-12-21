@@ -1,0 +1,20 @@
+{
+    "control": {
+        "Package": "termux-core",
+        "Version": "@TERMUX_CORE_PKG__VERSION@",
+        "Architecture": "@TERMUX_CORE_PKG__ARCH@",
+        "Maintainer": "@termux",
+        "Depends": "termux-core",
+        "Homepage": "https://github.com/termux/termux-core-package",
+        "Description": "Utils for Termux core"
+    },
+
+    "installation_prefix": "@TERMUX__PREFIX@",
+
+    "data_files": {
+        "": {
+            "source": "build/usr",
+            "source_recurse": true
+        }
+    }
+}
