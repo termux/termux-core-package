@@ -14,6 +14,33 @@
 
 static const char* LOG_TAG = "DataUtils";
 
+
+
+bool stringEquals(const char* string1, const char* string2) {
+    return stringEqualsE(string1, string2, /* `ensureNotEmpty` */ true);
+}
+
+bool stringEqualsE(const char* string1, const char* string2, bool ensureNotEmpty) {
+    if (string1 == NULL || string2 == NULL) {
+        return false;
+    }
+
+    if (ensureNotEmpty) {
+        if (*string1 == '\0' || *string2 == '\0') {
+            return false;
+        }
+    } else {
+        if (*string1 == '\0' && *string2 == '\0') {
+            return true;
+        } else if ((*string1 == '\0' && *string2 != '\0') || (*string1 != '\0' && *string2 == '\0')) {
+            return false;
+        }
+    }
+
+    return strcmp(string1, string2) == 0;
+}
+
+
 bool stringStartsWith(const char *string, const char *prefix) {
     if (string == NULL || prefix == NULL) {
         return false;

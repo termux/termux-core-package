@@ -9,10 +9,21 @@ extern "C" {
 
 
 
-/** Check if `str` starts with `prefix`. */
+/** Wrapper for [#stringEqualsE(const char*, const char*, bool)] that passes `ensureNotEmpty` as `true`. */
+bool stringEquals(const char *string1, const char *string2);
+
+/**
+ * Check if `string1` equals `string2`.
+ *
+ * If `ensureNotEmpty` is `true` and either string is empty, then `false` will be returned.
+ */
+bool stringEqualsE(const char *string1, const char *string2, bool ensureNotEmpty);
+
+
+/** Check if `string` starts with `prefix`. */
 bool stringStartsWith(const char *string, const char *prefix);
 
-/** Check if `str` ends with `suffix`. */
+/** Check if `string` ends with `suffix`. */
 bool stringEndsWith(const char *string, const char *suffix);
 
 
