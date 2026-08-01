@@ -83,6 +83,16 @@ extern "C" {
 #define PROCESS_CONTEXT_PREFIX__UNTRUSTED_APP_27 "u:r:untrusted_app_27:"
 
 /**
+ * The process context prefix assigned to app processes
+ * running inside the `run-as` command from ADB or root shell.
+ *
+ * - https://cs.android.com/android/platform/superproject/+/android-13.0.0_r18:system/sepolicy/private/seapp_contexts;l=177
+ * - https://cs.android.com/android/platform/superproject/+/android-13.0.0_r18:system/sepolicy/public/runas_app.te;l=1
+ * - https://cs.android.com/android/platform/superproject/+/android-13.0.0_r18:system/sepolicy/private/runas_app.te
+ */
+#define PROCESS_CONTEXT_PREFIX__RUNAS_APP "u:r:runas_app:"
+
+/**
  * The process context assigned to `root` (`0`) user processes by
  * AOSP, like for `adb root`. The process context always equals
  * `u:r:su:s0` without any categories.
@@ -92,6 +102,17 @@ extern "C" {
  * - https://cs.android.com/android/platform/superproject/+/android-14.0.0_r1:system/sepolicy/private/init.te;l=32
  */
 #define PROCESS_CONTEXT__AOSP_SU "u:r:su:s0"
+
+/**
+ * The process context assigned to `root` (`0`) user processes by
+ * KernelSU, like for `su` commands. The process context always equals
+ * `u:r:ksu:s0` without any categories.
+ *
+ * - https://github.com/tiann/KernelSU
+ * - https://github.com/tiann/KernelSU/blob/v3.2.5/manager/app/src/main/java/me/weishu/kernelsu/Natives.kt#L29
+ * - https://github.com/tiann/KernelSU/blob/v3.2.5/website/docs/guide/app-profile.md#selinux
+ */
+#define PROCESS_CONTEXT__KERNEL_SU "u:r:ksu:s0"
 
 /**
  * The process context type assigned to `root` (`0`) user processes by
